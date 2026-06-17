@@ -355,9 +355,6 @@ export default function PublicTestsPage() {
 
         <h1 className="text-4xl font-bold mb-2">📝 Tests</h1>
 
-        <p className="text-gray-600 mb-8">
-          यहाँ students के लिए published online tests दिखेंगे।
-        </p>
 
         {loading ? (
           <div className="bg-white rounded-3xl p-8 shadow text-center">

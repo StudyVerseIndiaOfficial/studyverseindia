@@ -116,9 +116,7 @@ export default function NotesPage() {
 
         <h1 className="text-4xl font-bold mb-2">📚 Notes / PDF</h1>
 
-        <p className="text-gray-600 mb-8">
-          Admin Dashboard से publish किए गए notes और PDF यहाँ live दिखेंगे।
-        </p>
+    
 
         {loading ? (
           <div className="bg-white rounded-3xl p-8 shadow text-center">

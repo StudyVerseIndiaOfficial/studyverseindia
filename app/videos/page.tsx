@@ -68,9 +68,7 @@ export default function VideosPage() {
 
         <h1 className="text-4xl font-bold mb-2">🎥 Videos</h1>
 
-        <p className="text-gray-600 mb-8">
-          Admin Dashboard से publish किए गए YouTube videos यहाँ दिखेंगे।
-        </p>
+       
 
         {loading ? (
           <div className="bg-white rounded-3xl p-8 shadow text-center">

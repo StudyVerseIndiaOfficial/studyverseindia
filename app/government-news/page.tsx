@@ -1,5 +1,5 @@
 "use client";
-
+import { searchAndSortItems } from "@/lib/searchContent";
 import { useEffect, useState } from "react";
 import { collection, getDocs } from "firebase/firestore";
 import { db } from "@/lib/firebase";
@@ -45,6 +45,7 @@ function makeClickableText(text: string) {
 export default function GovernmentNewsPage() {
   const [items, setItems] = useState<GovernmentNewsItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [searchText, setSearchText] = useState("");
   const [selectedItem, setSelectedItem] = useState<GovernmentNewsItem | null>(
     null
   );
@@ -84,10 +85,6 @@ export default function GovernmentNewsPage() {
         </a>
 
         <h1 className="text-4xl font-bold mb-2">🏛 Government News</h1>
-
-        <p className="text-gray-600 mb-8">
-          Admin Dashboard से publish की गई government news यहाँ live दिखेगी।
-        </p>
 
         {loading ? (
           <div className="bg-white rounded-3xl p-8 shadow text-center">
