@@ -1,26 +1,68 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #f3f4f6;
+  --foreground: #111827;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  color-scheme: light;
+  background: #f3f4f6;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  background: #f3f4f6;
+  color: #111827;
   font-family: Arial, Helvetica, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button,
+input,
+textarea,
+select {
+  font-family: inherit;
+}
+
+/* Mobile dark mode fix */
+main {
+  color: #111827;
+}
+
+/* White cards ke andar text hamesha dark rahe */
+.bg-white,
+.bg-gray-50,
+.bg-gray-100 {
+  color: #111827;
+}
+
+/* Important readable text */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  color: inherit;
+}
+
+/* Bottom space for mobile fixed footer */
+body {
+  padding-bottom: 72px;
+}
+
+/* Image smooth */
+img {
+  max-width: 100%;
 }
