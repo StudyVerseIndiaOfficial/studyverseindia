@@ -33,6 +33,10 @@ const navItems = [
 export default function BottomNav() {
   const pathname = usePathname();
 
+  if (pathname.startsWith("/admin")) {
+    return null;
+  }
+
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-200 shadow-[0_-6px_20px_rgba(0,0,0,0.08)]">
       <div className="max-w-6xl mx-auto grid grid-cols-5">
@@ -52,17 +56,10 @@ export default function BottomNav() {
                   : "text-gray-700 hover:text-blue-700"
               }`}
             >
-              <span
-                className={`text-2xl leading-none ${
-                  isActive ? "scale-110" : ""
-                }`}
-              >
+              <span className={`text-2xl leading-none ${isActive ? "scale-110" : ""}`}>
                 {item.icon}
               </span>
-
-              <span className="leading-none">
-                {item.label}
-              </span>
+              <span className="leading-none">{item.label}</span>
             </a>
           );
         })}

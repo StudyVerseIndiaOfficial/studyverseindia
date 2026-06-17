@@ -1,36 +1,4 @@
-import AdBox from "@/components/AdBox";
-const quickLinks = [
-  {
-    title: "Important Updates",
-    icon: "📢",
-    link: "/latest-info",
-    color: "from-blue-600 to-indigo-700",
-  },
-  {
-    title: "Notes",
-    icon: "📚",
-    link: "/notes",
-    color: "from-emerald-600 to-green-700",
-  },
-  {
-    title: "Videos",
-    icon: "🎥",
-    link: "/videos",
-    color: "from-red-600 to-rose-700",
-  },
-  {
-    title: "Tests",
-    icon: "📝",
-    link: "/tests",
-    color: "from-purple-600 to-violet-700",
-  },
-  {
-    title: "Alerts",
-    icon: "🔔",
-    link: "/notifications",
-    color: "from-yellow-500 to-orange-600",
-  },
-];
+import { Fragment } from "react";
 
 const sections = [
   {
@@ -77,6 +45,19 @@ const sections = [
   },
 ];
 
+function AdBox() {
+  return (
+    <div className="md:col-span-2 lg:col-span-3 bg-white border-2 border-dashed border-gray-300 rounded-3xl p-6 text-center shadow-sm">
+      <p className="text-sm font-bold text-gray-500 uppercase tracking-wide">
+        Advertisement
+      </p>
+      <p className="text-xs text-gray-400 mt-1">
+        Google Ads will appear here after approval
+      </p>
+    </div>
+  );
+}
+
 export default function HomePage() {
   return (
     <main className="min-h-screen bg-gray-100 pb-24">
@@ -95,73 +76,55 @@ export default function HomePage() {
 
       <section
         id="student-dashboard"
-        className="max-w-6xl mx-auto px-5 -mt-8 relative z-10"
+        className="max-w-6xl mx-auto px-5 py-10"
       >
-        <div className="bg-white rounded-[28px] shadow-2xl border border-gray-100 p-4 md:p-6">
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
-            {quickLinks.map((item) => (
-              <a
-                key={item.title}
-                href={item.link}
-                className={`bg-gradient-to-br ${item.color} text-white rounded-3xl px-4 py-5 shadow-lg hover:shadow-2xl hover:-translate-y-1 transition`}
-              >
-                <div className="text-3xl mb-3">{item.icon}</div>
+        <div className="mb-8">
+          <h2 className="text-3xl md:text-4xl font-black text-gray-900">
+            Student Public Dashboard
+          </h2>
 
-                <h2 className="text-lg md:text-xl font-black leading-tight">
-                  {item.title}
-                </h2>
-
-                <p className="text-sm opacity-90 mt-2 font-semibold">
-                  Open Now →
-                </p>
-              </a>
-            ))}
-          </div>
+          <p className="text-gray-700 mt-2 text-base md:text-lg">
+            Notes, videos, tests, alerts और important updates एक जगह।
+          </p>
         </div>
-      </section>
-      <section className="max-w-6xl mx-auto px-5">
-  <AdBox height="h-24" />
-</section>
 
-      <section className="max-w-6xl mx-auto px-5 py-10">
         <div className="grid gap-7 md:grid-cols-2 lg:grid-cols-3">
-          {sections.map((section) => (
-            <a
-              key={section.title}
-              href={section.link}
-              className="group bg-white rounded-[28px] shadow-lg overflow-hidden hover:shadow-2xl hover:-translate-y-1 transition border border-gray-100"
-            >
-              <div className="relative">
-                <img
-                  src={section.image}
-                  alt={section.title}
-                  className="w-full h-52 object-cover bg-gray-200"
-                />
+          {sections.map((section, index) => (
+            <Fragment key={section.title}>
+              <a
+                href={section.link}
+                className="group bg-white rounded-[28px] shadow-lg overflow-hidden hover:shadow-2xl hover:-translate-y-1 transition border border-gray-100"
+              >
+                <div className="relative">
+                  <img
+                    src={section.image}
+                    alt={section.title}
+                    className="w-full h-52 object-cover bg-gray-200"
+                  />
 
-                <div className="absolute top-4 right-4 bg-white/95 text-blue-700 px-4 py-2 rounded-full text-sm font-black shadow">
-                  Open
+                  <div className="absolute top-4 right-4 bg-white/95 text-blue-700 px-4 py-2 rounded-full text-sm font-black shadow">
+                    Open
+                  </div>
                 </div>
-              </div>
 
-              <div className="p-6">
-                <h3 className="text-2xl font-black mb-3 text-gray-900 group-hover:text-blue-700 transition">
-                  {section.title}
-                </h3>
+                <div className="p-6">
+                  <h3 className="text-2xl font-black mb-3 text-gray-900 group-hover:text-blue-700 transition">
+                    {section.title}
+                  </h3>
 
-                <p className="text-gray-700 text-base leading-relaxed">
-                  {section.description}
-                </p>
+                  <p className="text-gray-700 text-base leading-relaxed">
+                    {section.description}
+                  </p>
 
-                <div className="mt-5 inline-flex items-center gap-2 bg-blue-600 text-white px-5 py-3 rounded-2xl font-bold shadow-md">
-                  Open Section →
+                  <div className="mt-5 inline-flex items-center gap-2 bg-blue-600 text-white px-5 py-3 rounded-2xl font-bold shadow-md">
+                    Open Section →
+                  </div>
                 </div>
-              </div>
-            </a>
-            {index === 2 && (
-                <div className="mt-7">
-                  <AdBox height="h-24" />
-                </div>
-              )}
+              </a>
+
+              {index === 2 && <AdBox />}
+            </Fragment>
+          ))}
         </div>
       </section>
     </main>
