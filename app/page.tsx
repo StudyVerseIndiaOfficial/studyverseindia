@@ -1,3 +1,4 @@
+import AdBox from "@/components/AdBox";
 const quickLinks = [
   {
     title: "Important Updates",
@@ -118,6 +119,9 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+      <section className="max-w-6xl mx-auto px-5">
+  <AdBox height="h-24" />
+</section>
 
       <section className="max-w-6xl mx-auto px-5 py-10">
         <div className="grid gap-7 md:grid-cols-2 lg:grid-cols-3">
@@ -153,7 +157,11 @@ export default function HomePage() {
                 </div>
               </div>
             </a>
-          ))}
+            {index === 2 && (
+                <div className="mt-7">
+                  <AdBox height="h-24" />
+                </div>
+              )}
         </div>
       </section>
     </main>

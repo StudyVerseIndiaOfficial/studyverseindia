@@ -354,7 +354,10 @@ export default function PublicTestsPage() {
         </a>
 
         <h1 className="text-4xl font-bold mb-2">📝 Tests</h1>
-
+ <div className="mb-5 rounded-2xl bg-gradient-to-r from-purple-50 via-blue-50 to-indigo-50 border border-purple-100 p-4 shadow-sm">
+  <p className="text-[17px] md:text-lg font-extrabold text-gray-900 leading-relaxed break-words line-clamp-3">
+    {test.description}
+  </p>
 
         {loading ? (
           <div className="bg-white rounded-3xl p-8 shadow text-center">
