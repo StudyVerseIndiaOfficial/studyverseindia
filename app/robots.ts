@@ -1,7 +1,7 @@
 import type { MetadataRoute } from "next";
 
 export default function robots(): MetadataRoute.Robots {
-  const siteUrl = "http://localhost:3000";
+ const siteUrl = "https://studyverseindia.vercel.app";
 
   return {
     rules: [
