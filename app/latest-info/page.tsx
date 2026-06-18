@@ -67,6 +67,7 @@ export default function LatestInfoPage() {
   const [items, setItems] = useState<LatestInfoItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedItem, setSelectedItem] = useState<LatestInfoItem | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
     const loadLatestInfo = async () => {
@@ -81,7 +82,12 @@ export default function LatestInfoPage() {
           .filter(
             (item) =>
               item.module === "Latest Information" && item.published === true
-          );
+          )
+          .sort((a, b) => {
+            const dateA = a.date ? new Date(a.date).getTime() : 0;
+            const dateB = b.date ? new Date(b.date).getTime() : 0;
+            return dateB - dateA;
+          });
 
         setItems(data);
       } catch (error) {
@@ -95,6 +101,19 @@ export default function LatestInfoPage() {
     loadLatestInfo();
   }, []);
 
+  const filteredItems = items.filter((item) => {
+    const searchText = searchQuery.toLowerCase();
+
+    return (
+      item.title?.toLowerCase().includes(searchText) ||
+      item.description?.toLowerCase().includes(searchText) ||
+      item.course?.toLowerCase().includes(searchText) ||
+      item.subject?.toLowerCase().includes(searchText) ||
+      item.chapter?.toLowerCase().includes(searchText) ||
+      item.topic?.toLowerCase().includes(searchText)
+    );
+  });
+
   return (
     <main className="min-h-screen bg-gray-100 px-5 py-8">
       <section className="max-w-6xl mx-auto">
@@ -104,17 +123,27 @@ export default function LatestInfoPage() {
 
         <h1 className="text-4xl font-bold mb-2">📢 Latest Information</h1>
 
+        <div className="bg-white rounded-2xl shadow-md p-4 mb-6">
+          <input
+            type="text"
+            placeholder="Search latest information..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full outline-none text-gray-700"
+          />
+        </div>
+
         {loading ? (
           <div className="bg-white rounded-3xl p-8 shadow text-center">
             Loading latest information...
           </div>
-        ) : items.length === 0 ? (
+        ) : filteredItems.length === 0 ? (
           <div className="bg-white rounded-3xl p-8 shadow text-center text-gray-500">
             अभी कोई published latest information उपलब्ध नहीं है।
           </div>
         ) : (
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {items.map((item) => (
+            {filteredItems.map((item) => (
               <div
                 key={item.id}
                 className="bg-white rounded-3xl shadow-md overflow-hidden hover:shadow-xl hover:-translate-y-1 transition"

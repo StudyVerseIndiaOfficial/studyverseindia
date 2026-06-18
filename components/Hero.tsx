@@ -15,10 +15,6 @@ export default function Hero() {
         BPSC • Bihar Teacher • Banking • SSC • Bihar Board
       </p>
 
-      <p className="mt-4 text-blue-100 max-w-2xl">
-        Notes, Videos, Tests, Latest Updates और Government News — सब एक जगह।
-      </p>
-
       <div className="mt-8 flex flex-wrap gap-4">
         <Link
           href="/notes"

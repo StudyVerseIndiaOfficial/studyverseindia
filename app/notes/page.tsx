@@ -78,6 +78,7 @@ export default function NotesPage() {
   const [items, setItems] = useState<NoteItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedItem, setSelectedItem] = useState<NoteItem | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
     const loadNotes = async () => {
@@ -93,7 +94,12 @@ export default function NotesPage() {
             (item) =>
               (item.module === "Notes / PDF" || item.module === "Notes") &&
               item.published === true
-          );
+          )
+          .sort((a, b) => {
+            const dateA = a.date ? new Date(a.date).getTime() : 0;
+            const dateB = b.date ? new Date(b.date).getTime() : 0;
+            return dateB - dateA;
+          });
 
         setItems(data);
       } catch (error) {
@@ -107,6 +113,19 @@ export default function NotesPage() {
     loadNotes();
   }, []);
 
+  const filteredItems = items.filter((item) => {
+    const searchText = searchQuery.toLowerCase();
+
+    return (
+      item.title?.toLowerCase().includes(searchText) ||
+      item.description?.toLowerCase().includes(searchText) ||
+      item.course?.toLowerCase().includes(searchText) ||
+      item.subject?.toLowerCase().includes(searchText) ||
+      item.chapter?.toLowerCase().includes(searchText) ||
+      item.topic?.toLowerCase().includes(searchText)
+    );
+  });
+
   return (
     <main className="min-h-screen bg-gray-100 px-5 py-8">
       <section className="max-w-6xl mx-auto">
@@ -116,19 +135,27 @@ export default function NotesPage() {
 
         <h1 className="text-4xl font-bold mb-2">📚 Notes / PDF</h1>
 
-    
+        <div className="bg-white rounded-2xl shadow-md p-4 mb-6">
+          <input
+            type="text"
+            placeholder="Search notes..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full outline-none text-gray-700"
+          />
+        </div>
 
         {loading ? (
           <div className="bg-white rounded-3xl p-8 shadow text-center">
             Loading notes...
           </div>
-        ) : items.length === 0 ? (
+        ) : filteredItems.length === 0 ? (
           <div className="bg-white rounded-3xl p-8 shadow text-center text-gray-500">
             अभी कोई published notes उपलब्ध नहीं है।
           </div>
         ) : (
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {items.map((item) => (
+            {filteredItems.map((item) => (
               <div
                 key={item.id}
                 className="bg-white rounded-3xl shadow-md overflow-hidden hover:shadow-xl hover:-translate-y-1 transition"

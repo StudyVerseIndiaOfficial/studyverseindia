@@ -63,7 +63,12 @@ export default function GovernmentNewsPage() {
           .filter(
             (item) =>
               item.module === "Government News" && item.published === true
-          );
+          )
+          .sort((a, b) => {
+            const dateA = a.date ? new Date(a.date).getTime() : 0;
+            const dateB = b.date ? new Date(b.date).getTime() : 0;
+            return dateB - dateA;
+          });
 
         setItems(data);
       } catch (error) {
@@ -77,6 +82,19 @@ export default function GovernmentNewsPage() {
     loadData();
   }, []);
 
+  const filteredItems = items.filter((item) => {
+    const search = searchText.toLowerCase();
+
+    return (
+      item.title?.toLowerCase().includes(search) ||
+      item.description?.toLowerCase().includes(search) ||
+      item.course?.toLowerCase().includes(search) ||
+      item.subject?.toLowerCase().includes(search) ||
+      item.chapter?.toLowerCase().includes(search) ||
+      item.topic?.toLowerCase().includes(search)
+    );
+  });
+
   return (
     <main className="min-h-screen bg-gray-100 px-5 py-8">
       <section className="max-w-6xl mx-auto">
@@ -86,17 +104,27 @@ export default function GovernmentNewsPage() {
 
         <h1 className="text-4xl font-bold mb-2">🏛 Government News</h1>
 
+        <div className="bg-white rounded-2xl shadow-md p-4 mb-6">
+          <input
+            type="text"
+            placeholder="Search government news..."
+            value={searchText}
+            onChange={(e) => setSearchText(e.target.value)}
+            className="w-full outline-none text-gray-700"
+          />
+        </div>
+
         {loading ? (
           <div className="bg-white rounded-3xl p-8 shadow text-center">
             Loading government news...
           </div>
-        ) : items.length === 0 ? (
+        ) : filteredItems.length === 0 ? (
           <div className="bg-white rounded-3xl p-8 shadow text-center text-gray-500">
             अभी कोई published government news उपलब्ध नहीं है।
           </div>
         ) : (
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {items.map((item) => (
+            {filteredItems.map((item) => (
               <div
                 key={item.id}
                 className="bg-white rounded-3xl shadow-md overflow-hidden hover:shadow-xl hover:-translate-y-1 transition"

@@ -74,6 +74,7 @@ export default function LinksPage() {
   const [items, setItems] = useState<LinkItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedItem, setSelectedItem] = useState<LinkItem | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
     const loadLinks = async () => {
@@ -88,7 +89,12 @@ export default function LinksPage() {
           .filter(
             (item) =>
               item.module === "Useful Links" && item.published === true
-          );
+          )
+          .sort((a, b) => {
+            const dateA = a.date ? new Date(a.date).getTime() : 0;
+            const dateB = b.date ? new Date(b.date).getTime() : 0;
+            return dateB - dateA;
+          });
 
         setItems(data);
       } catch (error) {
@@ -102,6 +108,19 @@ export default function LinksPage() {
     loadLinks();
   }, []);
 
+  const filteredItems = items.filter((item) => {
+    const searchText = searchQuery.toLowerCase();
+
+    return (
+      item.title?.toLowerCase().includes(searchText) ||
+      item.description?.toLowerCase().includes(searchText) ||
+      item.course?.toLowerCase().includes(searchText) ||
+      item.subject?.toLowerCase().includes(searchText) ||
+      item.chapter?.toLowerCase().includes(searchText) ||
+      item.topic?.toLowerCase().includes(searchText)
+    );
+  });
+
   return (
     <main className="min-h-screen bg-gray-100 px-5 py-8">
       <section className="max-w-6xl mx-auto">
@@ -111,18 +130,27 @@ export default function LinksPage() {
 
         <h1 className="text-4xl font-bold mb-2">🔗 Important Links</h1>
 
-      
+        <div className="bg-white rounded-2xl shadow-md p-4 mb-6">
+          <input
+            type="text"
+            placeholder="Search important links..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full outline-none text-gray-700"
+          />
+        </div>
+
         {loading ? (
           <div className="bg-white rounded-3xl p-8 shadow text-center">
             Loading important links...
           </div>
-        ) : items.length === 0 ? (
+        ) : filteredItems.length === 0 ? (
           <div className="bg-white rounded-3xl p-8 shadow text-center text-gray-500">
             अभी कोई published important link उपलब्ध नहीं है।
           </div>
         ) : (
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {items.map((item) => (
+            {filteredItems.map((item) => (
               <div
                 key={item.id}
                 className="bg-white rounded-3xl shadow-md overflow-hidden hover:shadow-xl hover:-translate-y-1 transition"

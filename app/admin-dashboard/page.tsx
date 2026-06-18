@@ -301,9 +301,7 @@ export default function AdminDashboardPage() {
 
       <section className="max-w-6xl mx-auto">
         <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
-          <a href="/" className="text-blue-700 font-bold">
-            ← Back to Home
-          </a>
+         
 
           <div className="flex flex-wrap gap-2">
             <a

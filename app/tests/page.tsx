@@ -77,6 +77,7 @@ export default function PublicTestsPage() {
   const [selectedAnswers, setSelectedAnswers] = useState<string[]>([]);
   const [showResult, setShowResult] = useState(false);
   const [timeLeft, setTimeLeft] = useState(0);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const activeQuestions = selectedTest?.questions || [];
 
@@ -96,7 +97,12 @@ export default function PublicTestsPage() {
               item.published === true &&
               item.questions &&
               item.questions.length > 0
-          );
+          )
+          .sort((a, b) => {
+            const dateA = a.date ? new Date(a.date).getTime() : 0;
+            const dateB = b.date ? new Date(b.date).getTime() : 0;
+            return dateB - dateA;
+          });
 
         setTests(data);
       } catch (error) {
@@ -127,6 +133,19 @@ export default function PublicTestsPage() {
 
     return () => clearInterval(timer);
   }, [testStarted, showResult, timeLeft]);
+
+  const filteredTests = tests.filter((test) => {
+    const searchText = searchQuery.toLowerCase();
+
+    return (
+      test.title?.toLowerCase().includes(searchText) ||
+      test.description?.toLowerCase().includes(searchText) ||
+      test.course?.toLowerCase().includes(searchText) ||
+      test.subject?.toLowerCase().includes(searchText) ||
+      test.chapter?.toLowerCase().includes(searchText) ||
+      test.topic?.toLowerCase().includes(searchText)
+    );
+  });
 
   const startTest = (test: TestItem) => {
     const duration = test.durationMinutes || 10;
@@ -354,22 +373,28 @@ export default function PublicTestsPage() {
         </a>
 
         <h1 className="text-4xl font-bold mb-2">📝 Tests</h1>
- <div className="mb-5 rounded-2xl bg-gradient-to-r from-purple-50 via-blue-50 to-indigo-50 border border-purple-100 p-4 shadow-sm">
-  <p className="text-[17px] md:text-lg font-extrabold text-gray-900 leading-relaxed break-words line-clamp-3">
-    {test.description}
-  </p>
+
+        <div className="bg-white rounded-2xl shadow-md p-4 mb-6">
+          <input
+            type="text"
+            placeholder="Search tests..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full outline-none text-gray-700"
+          />
+        </div>
 
         {loading ? (
           <div className="bg-white rounded-3xl p-8 shadow text-center">
             Loading tests...
           </div>
-        ) : tests.length === 0 ? (
+        ) : filteredTests.length === 0 ? (
           <div className="bg-white rounded-3xl p-8 shadow text-center text-gray-500">
             अभी कोई published test उपलब्ध नहीं है।
           </div>
         ) : (
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {tests.map((test) => (
+            {filteredTests.map((test) => (
               <div
                 key={test.id}
                 className="bg-white rounded-3xl shadow-md overflow-hidden hover:shadow-xl hover:-translate-y-1 transition"
