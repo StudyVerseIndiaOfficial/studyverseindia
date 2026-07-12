@@ -5,7 +5,7 @@ import { useMemo, useRef, useState } from "react";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
 
-type LayoutMode = "single" | "double";
+type LayoutMode = "single" | "double" | "board";
 
 type QuestionItem = {
   number: string;
@@ -309,10 +309,13 @@ export default function PdfMakerPage() {
 
   const parsed = useMemo(() => parseBulkText(bulkText), [bulkText]);
 
-  const pages = useMemo(
-    () => paginateQuestions(parsed.questions, layout),
-    [parsed.questions, layout]
-  );
+ const pages = useMemo(() => {
+  if (layout === "board") {
+    return parsed.questions.map((question) => [[question]]);
+  }
+
+  return paginateQuestions(parsed.questions, layout);
+}, [parsed.questions, layout]);
 
   const applyTheme = (index: number) => {
     setSelectedTheme(index);
@@ -334,7 +337,18 @@ export default function PdfMakerPage() {
     setIsDownloading(true);
 
     try {
-      const pdf = new jsPDF("p", "mm", "a4");
+    const isBoardMode = layout === "board";
+
+const pdf = isBoardMode
+  ? new jsPDF({
+      orientation: "landscape",
+      unit: "mm",
+      format: [297, 167.06],
+    })
+  : new jsPDF("p", "mm", "a4");
+
+const pdfWidth = isBoardMode ? 297 : 210;
+const pdfHeight = isBoardMode ? 167.06 : 297;
 
       for (let i = 0; i < pageElements.length; i++) {
         const canvas = await html2canvas(pageElements[i], {
@@ -350,7 +364,7 @@ export default function PdfMakerPage() {
           pdf.addPage();
         }
 
-        pdf.addImage(imgData, "JPEG", 0, 0, 210, 297);
+       pdf.addImage(imgData, "JPEG", 0, 0, pdfWidth, pdfHeight);
       }
 
       pdf.save(`${safeFileName(parsed.header)}.pdf`);
@@ -410,29 +424,40 @@ export default function PdfMakerPage() {
               placeholder="Mukhy Header, Chapter, Q1, A B C D, Answer, Exam, Date paste करें..."
             />
 
-            <div className="mt-5 grid grid-cols-2 gap-3">
-              <button
-                onClick={() => setLayout("single")}
-                className={`rounded-2xl px-4 py-3 text-sm font-black ${
-                  layout === "single"
-                    ? "bg-red-900 text-white"
-                    : "bg-red-50 text-red-900"
-                }`}
-              >
-                Single Column
-              </button>
+            <div className="mt-5 grid grid-cols-3 gap-3">
+  <button
+    onClick={() => setLayout("single")}
+    className={`rounded-2xl px-4 py-3 text-xs font-black ${
+      layout === "single"
+        ? "bg-red-900 text-white"
+        : "bg-red-50 text-red-900"
+    }`}
+  >
+    Single
+  </button>
 
-              <button
-                onClick={() => setLayout("double")}
-                className={`rounded-2xl px-4 py-3 text-sm font-black ${
-                  layout === "double"
-                    ? "bg-red-900 text-white"
-                    : "bg-red-50 text-red-900"
-                }`}
-              >
-                Double Column
-              </button>
-            </div>
+  <button
+    onClick={() => setLayout("double")}
+    className={`rounded-2xl px-4 py-3 text-xs font-black ${
+      layout === "double"
+        ? "bg-red-900 text-white"
+        : "bg-red-50 text-red-900"
+    }`}
+  >
+    Double
+  </button>
+
+  <button
+    onClick={() => setLayout("board")}
+    className={`rounded-2xl px-4 py-3 text-xs font-black ${
+      layout === "board"
+        ? "bg-red-900 text-white"
+        : "bg-red-50 text-red-900"
+    }`}
+  >
+    Board PDF
+  </button>
+</div>
 
             <div className="mt-6">
               <label className="mb-2 block text-sm font-black text-gray-700">
@@ -514,7 +539,7 @@ export default function PdfMakerPage() {
             <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
               <div>
                 <h2 className="text-xl font-black text-red-950">
-                  Live A4 Preview
+                  Live PDF Preview
                 </h2>
                 <p className="text-xs font-bold text-gray-500">
                   यही layout PDF में download होगा।
@@ -522,7 +547,11 @@ export default function PdfMakerPage() {
               </div>
 
               <span className="rounded-full bg-red-50 px-4 py-2 text-xs font-black text-red-800">
-                {layout === "single" ? "Single Column A4" : "Double Column A4"}
+                {layout === "board"
+  ? "Digital Board Slide PDF"
+  : layout === "single"
+    ? "Single Column A4"
+    : "Double Column A4"}
               </span>
             </div>
 
@@ -535,18 +564,40 @@ export default function PdfMakerPage() {
                     </p>
                   </div>
                 ) : (
-                  pages.map((page, pageIndex) => (
-                    <PdfPreviewPage
-                      key={pageIndex}
-                      page={page}
-                      pageNumber={pageIndex + 1}
-                      totalPages={pages.length}
-                      header={parsed.header}
-                      chapter={parsed.chapter}
-                      colors={colors}
-                      layout={layout}
-                    />
-                  ))
+             pages.map((page, pageIndex) => {
+  if (layout === "board") {
+    const question = page[0]?.[0];
+
+    if (!question) {
+      return null;
+    }
+
+    return (
+      <BoardPreviewPage
+        key={pageIndex}
+        question={question}
+        pageNumber={pageIndex + 1}
+        totalPages={pages.length}
+        header={parsed.header}
+        chapter={parsed.chapter}
+        colors={colors}
+      />
+    );
+  }
+
+  return (
+    <PdfPreviewPage
+      key={pageIndex}
+      page={page}
+      pageNumber={pageIndex + 1}
+      totalPages={pages.length}
+      header={parsed.header}
+      chapter={parsed.chapter}
+      colors={colors}
+      layout={layout}
+    />
+  );
+})
                 )}
               </div>
             </div>
@@ -801,6 +852,272 @@ function QuestionBlock({
           </span>
         </div>
       )}
+    </div>
+  );
+}
+function BoardPreviewPage({
+  question,
+  pageNumber,
+  totalPages,
+  header,
+  chapter,
+  colors,
+}: {
+  question: QuestionItem;
+  pageNumber: number;
+  totalPages: number;
+  header: string;
+  chapter: string;
+  colors: ThemePreset;
+}) {
+  const examDateText = [question.exam, question.date].filter(Boolean).join(" ");
+
+  const questionFontSize =
+    question.question.length > 140
+      ? "22px"
+      : question.question.length > 90
+        ? "25px"
+        : "29px";
+
+  const optionFontSize = question.options.some((option) => option.length > 45)
+    ? "17px"
+    : "20px";
+
+  return (
+    <div
+      data-pdf-page="true"
+      style={{
+        width: "900px",
+        height: "506px",
+        background: `linear-gradient(135deg, ${colors.headerBg} 0%, #020617 55%, ${colors.headerBg} 100%)`,
+        padding: "22px",
+        boxSizing: "border-box",
+        position: "relative",
+        overflow: "hidden",
+        fontFamily: "'Noto Sans Devanagari', 'Mangal', Arial, sans-serif",
+        color: "#ffffff",
+      }}
+    >
+      <div
+        style={{
+          position: "absolute",
+          inset: "12px",
+          border: `2px solid ${colors.border}`,
+          borderRadius: "24px",
+          opacity: 0.9,
+        }}
+      />
+
+      <div
+        style={{
+          position: "absolute",
+          right: "-80px",
+          top: "-80px",
+          width: "230px",
+          height: "230px",
+          borderRadius: "999px",
+          background: colors.border,
+          opacity: 0.18,
+        }}
+      />
+
+      <div
+        style={{
+          position: "absolute",
+          left: "-70px",
+          bottom: "-70px",
+          width: "210px",
+          height: "210px",
+          borderRadius: "999px",
+          background: colors.headerText,
+          opacity: 0.13,
+        }}
+      />
+
+      <div style={{ position: "relative", zIndex: 2 }}>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: "14px",
+          }}
+        >
+          <div
+            style={{
+              maxWidth: "620px",
+              background: colors.headerText,
+              color: colors.headerBg,
+              padding: "8px 20px",
+              borderRadius: "999px",
+              fontSize: "19px",
+              lineHeight: "1.2",
+              fontWeight: 900,
+              boxShadow: "0 10px 24px rgba(0,0,0,0.25)",
+              whiteSpace: "nowrap",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+            }}
+          >
+            {header}
+          </div>
+
+          <div
+            style={{
+              border: `2px solid ${colors.border}`,
+              color: "#ffffff",
+              padding: "7px 16px",
+              borderRadius: "999px",
+              fontSize: "14px",
+              fontWeight: 900,
+              background: "rgba(255,255,255,0.08)",
+              whiteSpace: "nowrap",
+            }}
+          >
+            Slide {pageNumber}/{totalPages}
+          </div>
+        </div>
+
+        <div style={{ marginTop: "12px", textAlign: "center" }}>
+          <span
+            style={{
+              display: "inline-block",
+              maxWidth: "780px",
+              background: "#ffffff",
+              color: colors.chapter,
+              border: `2px solid ${colors.border}`,
+              padding: "7px 24px",
+              borderRadius: "15px",
+              fontSize: "22px",
+              lineHeight: "1.2",
+              fontWeight: 900,
+              boxShadow: "0 10px 24px rgba(0,0,0,0.25)",
+              whiteSpace: "nowrap",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+            }}
+          >
+            {chapter}
+          </span>
+        </div>
+
+        <div
+          style={{
+            marginTop: "17px",
+            background: "rgba(255,255,255,0.97)",
+            color: "#111827",
+            border: `3px solid ${colors.border}`,
+            borderRadius: "22px",
+            padding: "20px",
+            minHeight: "310px",
+            boxShadow: "0 20px 44px rgba(0,0,0,0.34)",
+          }}
+        >
+          <div
+            style={{
+              color: colors.question,
+              fontSize: questionFontSize,
+              lineHeight: "1.25",
+              fontWeight: 900,
+              marginBottom: "16px",
+            }}
+          >
+            {question.number}. {question.question}
+          </div>
+
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "1fr 1fr",
+              gap: "11px",
+            }}
+          >
+            {question.options.map((option) => (
+              <div
+                key={option}
+                style={{
+                  border: `1.8px solid ${colors.border}`,
+                  borderRadius: "14px",
+                  padding: "9px 14px",
+                  background: colors.background,
+                  color: colors.option,
+                  fontSize: optionFontSize,
+                  lineHeight: "1.22",
+                  fontWeight: 900,
+                  overflow: "hidden",
+                }}
+              >
+                {option}
+              </div>
+            ))}
+          </div>
+
+          <div
+            style={{
+              marginTop: "15px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              gap: "12px",
+            }}
+          >
+            {examDateText ? (
+              <div
+                style={{
+                  display: "inline-block",
+                  borderRadius: "999px",
+                  padding: "6px 14px",
+                  background: colors.headerBg,
+                  color: "#ffffff",
+                  border: `1.8px solid ${colors.border}`,
+                  fontSize: "14px",
+                  lineHeight: "1.2",
+                  fontWeight: 900,
+                }}
+              >
+                {examDateText}
+              </div>
+            ) : (
+              <span />
+            )}
+
+            {question.answer && (
+              <div
+                style={{
+                  borderRadius: "13px",
+                  padding: "7px 16px",
+                  background: "#ecfdf5",
+                  color: colors.answer,
+                  border: `1.8px solid ${colors.answer}`,
+                  fontSize: "16px",
+                  fontWeight: 900,
+                  whiteSpace: "nowrap",
+                }}
+              >
+                Answer: {question.answer}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      <div
+        style={{
+          position: "absolute",
+          left: "32px",
+          right: "32px",
+          bottom: "16px",
+          display: "flex",
+          justifyContent: "space-between",
+          color: "rgba(255,255,255,0.82)",
+          fontSize: "12px",
+          fontWeight: 900,
+          zIndex: 2,
+        }}
+      >
+        <span>Study Verse India</span>
+        <span>Premium Digital Board PDF</span>
+      </div>
     </div>
   );
 }
