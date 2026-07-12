@@ -14,6 +14,7 @@ type SubjectiveItem = {
   exam?: string;
   date?: string;
   isContinuation?: boolean;
+  forceOwnPage?: boolean;
 };
 
 type ThemePreset = {
@@ -108,10 +109,7 @@ Answer:
 Exam Date: BPSC Mains Practice 2026`;
 
 function parseSubjectiveText(text: string) {
-  const lines = text
-    .split("\n")
-    .map((line) => line.trim())
-    .filter(Boolean);
+  const lines = text.replace(/\r/g, "").split("\n");
 
   let header = "Study Verse India";
   let chapter = "Subjective Practice Set";
@@ -121,12 +119,21 @@ function parseSubjectiveText(text: string) {
 
   const saveCurrent = () => {
     if (current && current.question.trim()) {
-      current.answer = current.answer.trim();
+      current.answer = current.answer.trimEnd();
       items.push(current);
     }
   };
 
-  for (const line of lines) {
+  for (const rawLine of lines) {
+    const line = rawLine.trim();
+
+    if (!line) {
+      if (current && readingAnswer) {
+        current.answer += "\n";
+      }
+      continue;
+    }
+
     const headerMatch = line.match(
       /^(mukhy header|main header|header|मुख्य header|मुख्य शीर्षक)\s*[:\-]\s*(.+)$/i
     );
@@ -194,10 +201,10 @@ function parseSubjectiveText(text: string) {
 
     if (answerMatch && current) {
       readingAnswer = true;
-      const answerText = answerMatch[2]?.trim();
+      const answerText = answerMatch[2] ?? "";
 
-      if (answerText) {
-        current.answer += `${answerText}\n`;
+      if (answerText.trim()) {
+        current.answer += `${answerText.trimEnd()}\n`;
       }
 
       continue;
@@ -205,7 +212,7 @@ function parseSubjectiveText(text: string) {
 
     if (current) {
       if (readingAnswer) {
-        current.answer += `${line}\n`;
+        current.answer += `${rawLine.trimEnd()}\n`;
       } else {
         current.question += ` ${line}`;
       }
@@ -218,38 +225,65 @@ function parseSubjectiveText(text: string) {
 }
 
 function splitAnswerIntoChunks(item: SubjectiveItem, layout: LayoutMode) {
-  const maxChars =
-    layout === "board" ? 720 : layout === "double" ? 900 : 1900;
+  const cleanedAnswer = item.answer
+    .replace(/\r/g, "")
+    .replace(/\n{3,}/g, "\n\n")
+    .trimEnd();
 
-  if (item.answer.length <= maxChars) {
-    return [item];
+  const maxChars =
+    layout === "board" ? 700 : layout === "double" ? 1850 : 5600;
+
+  const minLastChunkChars =
+    layout === "board" ? 180 : layout === "double" ? 420 : 900;
+
+  if (cleanedAnswer.length <= maxChars) {
+    return [
+      {
+        ...item,
+        answer: cleanedAnswer,
+      },
+    ];
   }
 
-  const words = item.answer.split(/\s+/);
+  const tokens = cleanedAnswer.match(/\S+\s*/g) || [];
   const chunks: string[] = [];
   let currentChunk = "";
 
-  words.forEach((word) => {
-    if ((currentChunk + " " + word).trim().length > maxChars) {
-      chunks.push(currentChunk.trim());
-      currentChunk = word;
+  tokens.forEach((token) => {
+    const nextChunk = currentChunk + token;
+
+    if (nextChunk.length > maxChars) {
+      if (currentChunk.trim()) {
+        chunks.push(currentChunk.trimEnd());
+      }
+      currentChunk = token;
     } else {
-      currentChunk = `${currentChunk} ${word}`.trim();
+      currentChunk = nextChunk;
     }
   });
 
   if (currentChunk.trim()) {
-    chunks.push(currentChunk.trim());
+    chunks.push(currentChunk.trimEnd());
+  }
+
+  const lastChunk = chunks[chunks.length - 1];
+
+  if (
+    chunks.length > 1 &&
+    lastChunk &&
+    lastChunk.trim().length < minLastChunkChars
+  ) {
+    const last = chunks.pop();
+    chunks[chunks.length - 1] = `${chunks[chunks.length - 1]}\n\n${last}`.trimEnd();
   }
 
   return chunks.map((chunk, index) => ({
     ...item,
     answer: chunk,
     question:
-      index === 0
-        ? item.question
-        : `${item.question} — Answer Continued`,
+      index === 0 ? item.question : `${item.question} — Answer Continued`,
     isContinuation: index > 0,
+    forceOwnPage: layout !== "board",
   }));
 }
 
@@ -258,8 +292,8 @@ function prepareItems(items: SubjectiveItem[], layout: LayoutMode) {
 }
 
 function estimateSubjectiveHeight(item: SubjectiveItem, layout: LayoutMode) {
-  const questionCharsPerLine = layout === "double" ? 45 : 86;
-  const answerCharsPerLine = layout === "double" ? 40 : 82;
+  const questionCharsPerLine = layout === "double" ? 52 : 96;
+  const answerCharsPerLine = layout === "double" ? 48 : 102;
 
   const questionLines = Math.max(
     1,
@@ -271,12 +305,12 @@ function estimateSubjectiveHeight(item: SubjectiveItem, layout: LayoutMode) {
     Math.ceil(item.answer.length / answerCharsPerLine)
   );
 
-  let height = 50;
-  height += questionLines * (layout === "double" ? 17 : 22);
-  height += answerLines * (layout === "double" ? 15 : 18);
+  let height = 44;
+  height += questionLines * (layout === "double" ? 15 : 18);
+  height += answerLines * (layout === "double" ? 13 : 14);
 
   if (item.exam || item.date) {
-    height += 24;
+    height += 22;
   }
 
   return height;
@@ -294,8 +328,14 @@ function paginateSubjectiveItems(items: SubjectiveItem[], layout: LayoutMode) {
   let columnHeights = Array.from({ length: columnCount }, () => 0);
   let columnIndex = 0;
 
+  const currentPageHasContent = () =>
+    currentPage.some((column) => column.length > 0);
+
   const pushPage = () => {
-    pages.push(currentPage);
+    if (currentPageHasContent()) {
+      pages.push(currentPage);
+    }
+
     currentPage = Array.from({ length: columnCount }, () => []);
     columnHeights = Array.from({ length: columnCount }, () => 0);
     columnIndex = 0;
@@ -303,6 +343,24 @@ function paginateSubjectiveItems(items: SubjectiveItem[], layout: LayoutMode) {
 
   items.forEach((item) => {
     const height = estimateSubjectiveHeight(item, layout);
+
+    if (item.forceOwnPage) {
+      pushPage();
+
+      const ownPage: SubjectiveItem[][] = Array.from(
+        { length: columnCount },
+        () => []
+      );
+
+      ownPage[0].push(item);
+      pages.push(ownPage);
+
+      currentPage = Array.from({ length: columnCount }, () => []);
+      columnHeights = Array.from({ length: columnCount }, () => 0);
+      columnIndex = 0;
+
+      return;
+    }
 
     if (columnHeights[columnIndex] + height > maxHeight) {
       if (columnIndex < columnCount - 1) {
@@ -316,9 +374,7 @@ function paginateSubjectiveItems(items: SubjectiveItem[], layout: LayoutMode) {
     columnHeights[columnIndex] += height + 12;
   });
 
-  if (currentPage.some((column) => column.length > 0)) {
-    pages.push(currentPage);
-  }
+  pushPage();
 
   return pages;
 }
@@ -812,28 +868,53 @@ function SubjectiveBlock({
   layout: LayoutMode;
 }) {
   const examDateText = [item.exam, item.date].filter(Boolean).join(" ");
-  const answerParagraphs = item.answer.split("\n").filter(Boolean);
+
+  const answerParagraphs = item.answer
+    .split(/\n{2,}/)
+    .map((paragraph) => paragraph.trimEnd())
+    .filter((paragraph) => paragraph.trim().length > 0);
+    const isFullPageAnswer = item.forceOwnPage === true;
+
+const answerFontSize = isFullPageAnswer
+  ? layout === "double"
+    ? "9px"
+    : item.answer.length > 5000
+      ? "9.2px"
+      : "10px"
+  : layout === "double"
+    ? "10.2px"
+    : "11.8px";
+
+const answerLineHeight = isFullPageAnswer ? "1.28" : "1.42";
 
   return (
     <div
       style={{
+        width: "100%",
+        maxWidth: "100%",
         marginBottom: layout === "double" ? "8px" : "10px",
         border: `1.6px solid ${colors.border}`,
         borderRadius: "13px",
         background: "#ffffff",
         padding: layout === "double" ? "8px" : "10px",
         boxSizing: "border-box",
+        overflow: "hidden",
         breakInside: "avoid",
         pageBreakInside: "avoid",
       }}
     >
       <div
         style={{
+          width: "100%",
+          maxWidth: "100%",
           color: colors.question,
           fontSize: layout === "double" ? "13px" : "16px",
           lineHeight: "1.35",
           fontWeight: 900,
           marginBottom: "6px",
+          whiteSpace: "normal",
+          overflowWrap: "anywhere",
+          wordBreak: "break-word",
         }}
       >
         {item.number}. {item.question}
@@ -841,10 +922,14 @@ function SubjectiveBlock({
 
       <div
         style={{
+          width: "100%",
+          maxWidth: "100%",
           borderRadius: "10px",
           background: "#ffffff",
           border: `1px solid ${colors.border}`,
           padding: layout === "double" ? "7px" : "9px",
+          boxSizing: "border-box",
+          overflow: "hidden",
         }}
       >
         {answerParagraphs.length === 0 ? (
@@ -855,6 +940,9 @@ function SubjectiveBlock({
               fontSize: layout === "double" ? "10.5px" : "12.5px",
               lineHeight: "1.5",
               fontWeight: 700,
+              whiteSpace: "pre-wrap",
+              overflowWrap: "anywhere",
+              wordBreak: "break-word",
             }}
           >
             Answer not provided.
@@ -864,11 +952,15 @@ function SubjectiveBlock({
             <p
               key={index}
               style={{
-                margin: index === 0 ? "0" : "5px 0 0",
+                margin: index === 0 ? "0" : "10px 0 0",
                 color: colors.answer,
-                fontSize: layout === "double" ? "10.5px" : "12.5px",
-                lineHeight: "1.55",
+               fontSize: answerFontSize,
+lineHeight: answerLineHeight,
                 fontWeight: 750,
+                whiteSpace: "pre-wrap",
+                overflowWrap: "anywhere",
+                wordBreak: "break-word",
+                maxWidth: "100%",
               }}
             >
               {item.isContinuation && index === 0 ? "Continued: " : ""}
@@ -883,6 +975,7 @@ function SubjectiveBlock({
           style={{
             marginTop: "6px",
             display: "inline-block",
+            maxWidth: "100%",
             borderRadius: "999px",
             padding: layout === "double" ? "3px 8px" : "4px 10px",
             background: colors.background,
@@ -891,6 +984,9 @@ function SubjectiveBlock({
             fontSize: layout === "double" ? "9.5px" : "11px",
             lineHeight: "1.2",
             fontWeight: 900,
+            whiteSpace: "normal",
+            overflowWrap: "anywhere",
+            wordBreak: "break-word",
           }}
         >
           {examDateText}
@@ -1041,22 +1137,50 @@ function SubjectiveBoardPage({
             {item.number}. {item.question}
           </div>
 
-          <div
-            style={{
-              border: `2px solid ${colors.border}`,
-              borderRadius: "16px",
-              background: colors.background,
-              padding: "14px",
-              color: colors.answer,
-              fontSize: answerFontSize,
-              lineHeight: "1.42",
-              fontWeight: 800,
-              minHeight: "145px",
-            }}
-          >
-            {item.isContinuation ? "Continued: " : ""}
-            {item.answer}
-          </div>
+       <div
+  style={{
+    width: "100%",
+    maxWidth: "100%",
+    border: `2px solid ${colors.border}`,
+    borderRadius: "16px",
+    background: colors.background,
+    padding: "14px",
+    color: colors.answer,
+    fontSize: answerFontSize,
+    lineHeight: "1.42",
+    fontWeight: 800,
+    minHeight: "145px",
+    boxSizing: "border-box",
+    overflow: "hidden",
+    whiteSpace: "normal",
+    overflowWrap: "anywhere",
+    wordBreak: "break-word",
+  }}
+>
+  <div
+  style={{
+    width: "100%",
+    maxWidth: "100%",
+    border: `2px solid ${colors.border}`,
+    borderRadius: "16px",
+    background: colors.background,
+    padding: "14px",
+    color: colors.answer,
+    fontSize: answerFontSize,
+    lineHeight: "1.42",
+    fontWeight: 800,
+    minHeight: "145px",
+    boxSizing: "border-box",
+    overflow: "hidden",
+    whiteSpace: "pre-wrap",
+    overflowWrap: "anywhere",
+    wordBreak: "break-word",
+  }}
+>
+  {item.isContinuation ? "Continued: " : ""}
+  {item.answer}
+</div>
+</div>
 
           {examDateText && (
             <div
