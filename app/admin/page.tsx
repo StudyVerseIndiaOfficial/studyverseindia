@@ -1,5 +1,5 @@
 "use client";
-
+import Link from "next/link";
 import { useState } from "react";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "@/lib/firebase";
@@ -68,7 +68,10 @@ export default function AdminLoginPage() {
             className="w-full bg-blue-700 text-white py-3 rounded-xl font-bold hover:bg-blue-800 transition"
           >
             {loading ? "Logging in..." : "Login"}
+      
+
           </button>
+       
         </div>
 
         <a

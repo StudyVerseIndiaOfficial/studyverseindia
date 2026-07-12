@@ -304,21 +304,29 @@ export default function AdminDashboardPage() {
          
 
           <div className="flex flex-wrap gap-2">
-            <a
-              href="/admin-dashboard/tests"
-              className="bg-purple-700 text-white px-4 py-3 rounded-2xl font-bold shadow"
-            >
-              📝 Test Creator
-            </a>
+  <a
+    href="/admin-dashboard/tests"
+    className="bg-purple-700 text-white px-4 py-3 rounded-2xl font-bold shadow"
+  >
+    🧪 Test Creator
+  </a>
 
-            <button
-              onClick={logoutAdmin}
-              className="bg-red-600 text-white px-4 py-3 rounded-2xl font-bold shadow"
-            >
-              Logout
-            </button>
-          </div>
+  <a
+    href="/admin/pdf-maker"
+    className="inline-flex items-center justify-center rounded-2xl bg-red-900 px-5 py-3 text-sm font-black text-white shadow-lg transition hover:bg-red-800"
+  >
+    Smart PDF Maker
+  </a>
+
+  <button
+    onClick={logoutAdmin}
+    className="bg-red-600 text-white px-4 py-3 rounded-2xl font-bold shadow"
+  >
+    Logout
+  </button>
+</div>
         </div>
+     
 
         <div className="bg-gradient-to-br from-blue-700 via-indigo-700 to-purple-800 text-white rounded-[32px] shadow-2xl p-8 md:p-12 mb-8">
           <h1 className="text-4xl md:text-6xl font-black mb-4 leading-tight">
