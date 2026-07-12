@@ -302,8 +302,7 @@ export default function AdminDashboardPage() {
       <section className="max-w-6xl mx-auto">
         <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
          
-
-          <div className="flex flex-wrap gap-2">
+<div className="flex flex-wrap gap-2">
   <a
     href="/admin-dashboard/tests"
     className="bg-purple-700 text-white px-4 py-3 rounded-2xl font-bold shadow"
@@ -316,6 +315,13 @@ export default function AdminDashboardPage() {
     className="inline-flex items-center justify-center rounded-2xl bg-red-900 px-5 py-3 text-sm font-black text-white shadow-lg transition hover:bg-red-800"
   >
     Smart PDF Maker
+  </a>
+
+  <a
+    href="/admin/subjective-pdf-maker"
+    className="inline-flex items-center justify-center rounded-2xl bg-emerald-800 px-5 py-3 text-sm font-black text-white shadow-lg transition hover:bg-emerald-700"
+  >
+    Subjective PDF Maker
   </a>
 
   <button
