@@ -1021,7 +1021,11 @@ function SubjectiveBoardPage({
         : "27px";
 
   const answerFontSize =
-    item.answer.length > 650 ? "16px" : item.answer.length > 400 ? "18px" : "20px";
+    item.answer.length > 650
+      ? "16px"
+      : item.answer.length > 400
+        ? "18px"
+        : "20px";
 
   return (
     <div
@@ -1029,7 +1033,7 @@ function SubjectiveBoardPage({
       style={{
         width: "900px",
         height: "506px",
-        background: `linear-gradient(135deg, ${colors.headerBg} 0%, #020617 55%, ${colors.headerBg} 100%)`,
+        background: `linear-gradient(135deg, ${colors.headerBg} 0%, #020617 58%, ${colors.headerBg} 100%)`,
         padding: "22px",
         boxSizing: "border-box",
         position: "relative",
@@ -1044,181 +1048,281 @@ function SubjectiveBoardPage({
           inset: "12px",
           border: `2px solid ${colors.border}`,
           borderRadius: "24px",
-          opacity: 0.9,
+          opacity: 0.95,
         }}
       />
 
-      <div style={{ position: "relative", zIndex: 2 }}>
+      <div
+        style={{
+          position: "absolute",
+          right: "-70px",
+          top: "-80px",
+          width: "220px",
+          height: "220px",
+          borderRadius: "999px",
+          background: colors.border,
+          opacity: 0.16,
+        }}
+      />
+
+      <div
+        style={{
+          position: "absolute",
+          left: "-70px",
+          bottom: "-70px",
+          width: "200px",
+          height: "200px",
+          borderRadius: "999px",
+          background: colors.headerText,
+          opacity: 0.12,
+        }}
+      />
+
+      <div
+        style={{
+          position: "relative",
+          zIndex: 2,
+          height: "100%",
+          display: "flex",
+          flexDirection: "column",
+        }}
+      >
         <div
           style={{
+            position: "relative",
+            minHeight: "42px",
             display: "flex",
             alignItems: "center",
-            justifyContent: "space-between",
-            gap: "14px",
+            justifyContent: "center",
           }}
         >
           <div
             style={{
-              maxWidth: "620px",
-              background: colors.headerText,
-              color: colors.headerBg,
-              padding: "8px 20px",
+              width: "fit-content",
+              maxWidth: "610px",
+              minHeight: "36px",
+              padding: "0 26px",
               borderRadius: "999px",
-              fontSize: "19px",
-              lineHeight: "1.2",
+              background: `linear-gradient(135deg, ${colors.headerText} 0%, #ffffff 45%, ${colors.headerText} 100%)`,
+              color: colors.headerBg,
+              border: `2px solid ${colors.border}`,
+              fontSize: "18px",
+              lineHeight: "1",
               fontWeight: 900,
-              whiteSpace: "nowrap",
-              overflow: "hidden",
-              textOverflow: "ellipsis",
+              letterSpacing: "0.3px",
+              boxShadow:
+                "0 10px 24px rgba(0,0,0,0.28), inset 0 0 0 1px rgba(255,255,255,0.45)",
+              textAlign: "center",
+              display: "grid",
+              placeItems: "center",
+              overflowWrap: "anywhere",
+              wordBreak: "break-word",
             }}
           >
-            {header}
+            <span
+              style={{
+                display: "block",
+                transform: "translateY(-2px)",
+              }}
+            >
+              {header}
+            </span>
           </div>
 
           <div
             style={{
+              position: "absolute",
+              right: "0",
+              top: "3px",
+              minHeight: "34px",
+              padding: "0 15px",
+              borderRadius: "999px",
               border: `2px solid ${colors.border}`,
               color: "#ffffff",
-              padding: "7px 16px",
-              borderRadius: "999px",
-              fontSize: "14px",
+              fontSize: "13px",
+              lineHeight: "1",
               fontWeight: 900,
-              background: "rgba(255,255,255,0.08)",
+              background:
+                "linear-gradient(135deg, rgba(255,255,255,0.14), rgba(255,255,255,0.04))",
+              boxShadow: "0 8px 18px rgba(0,0,0,0.25)",
               whiteSpace: "nowrap",
+              textAlign: "center",
+              display: "grid",
+              placeItems: "center",
             }}
           >
-            Slide {pageNumber}/{totalPages}
+            <span
+              style={{
+                display: "block",
+                transform: "translateY(-2px)",
+              }}
+            >
+              Slide {pageNumber}/{totalPages}
+            </span>
           </div>
-        </div>
-
-        <div style={{ marginTop: "12px", textAlign: "center" }}>
-          <span
-            style={{
-              display: "inline-block",
-              maxWidth: "780px",
-              background: "#ffffff",
-              color: colors.chapter,
-              border: `2px solid ${colors.border}`,
-              padding: "7px 24px",
-              borderRadius: "15px",
-              fontSize: "22px",
-              lineHeight: "1.2",
-              fontWeight: 900,
-              whiteSpace: "nowrap",
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-            }}
-          >
-            {chapter}
-          </span>
         </div>
 
         <div
           style={{
-            marginTop: "17px",
-            background: "rgba(255,255,255,0.97)",
+            marginTop: "8px",
+            display: "flex",
+            justifyContent: "center",
+          }}
+        >
+          <div
+            style={{
+              width: "fit-content",
+              maxWidth: "760px",
+              minHeight: "38px",
+              background:
+                "linear-gradient(135deg, #ffffff 0%, #fff7ed 50%, #ffffff 100%)",
+              color: colors.chapter,
+              border: `2px solid ${colors.border}`,
+              padding: "0 28px",
+              borderRadius: "999px",
+              fontSize: "20px",
+              lineHeight: "1",
+              fontWeight: 900,
+              letterSpacing: "0.2px",
+              boxShadow:
+                "0 10px 24px rgba(0,0,0,0.25), inset 0 0 0 1px rgba(255,255,255,0.8)",
+              textAlign: "center",
+              overflowWrap: "anywhere",
+              wordBreak: "break-word",
+              display: "grid",
+              placeItems: "center",
+            }}
+          >
+            <span
+              style={{
+                display: "block",
+                transform: "translateY(-2px)",
+              }}
+            >
+              {chapter}
+            </span>
+          </div>
+        </div>
+
+        <div
+          style={{
+            marginTop: "12px",
+            flex: 1,
+            background: "linear-gradient(180deg, #ffffff 0%, #f8fafc 100%)",
             color: "#111827",
             border: `3px solid ${colors.border}`,
             borderRadius: "22px",
-            padding: "20px",
-            minHeight: "310px",
-            boxShadow: "0 20px 44px rgba(0,0,0,0.34)",
+            padding: "18px",
+            boxShadow:
+              "0 18px 38px rgba(0,0,0,0.34), inset 0 0 0 1px rgba(255,255,255,0.75)",
+            display: "flex",
+            flexDirection: "column",
+            overflow: "hidden",
+            position: "relative",
           }}
         >
           <div
             style={{
               color: colors.question,
               fontSize: questionFontSize,
-              lineHeight: "1.25",
+              lineHeight: "1.22",
               fontWeight: 900,
               marginBottom: "12px",
+              textAlign: "left",
+              overflowWrap: "anywhere",
+              wordBreak: "break-word",
             }}
           >
             {item.number}. {item.question}
           </div>
 
-       <div
-  style={{
-    width: "100%",
-    maxWidth: "100%",
-    border: `2px solid ${colors.border}`,
-    borderRadius: "16px",
-    background: colors.background,
-    padding: "14px",
-    color: colors.answer,
-    fontSize: answerFontSize,
-    lineHeight: "1.42",
-    fontWeight: 800,
-    minHeight: "145px",
-    boxSizing: "border-box",
-    overflow: "hidden",
-    whiteSpace: "normal",
-    overflowWrap: "anywhere",
-    wordBreak: "break-word",
-  }}
->
-  <div
-  style={{
-    width: "100%",
-    maxWidth: "100%",
-    border: `2px solid ${colors.border}`,
-    borderRadius: "16px",
-    background: colors.background,
-    padding: "14px",
-    color: colors.answer,
-    fontSize: answerFontSize,
-    lineHeight: "1.42",
-    fontWeight: 800,
-    minHeight: "145px",
-    boxSizing: "border-box",
-    overflow: "hidden",
-    whiteSpace: "pre-wrap",
-    overflowWrap: "anywhere",
-    wordBreak: "break-word",
-  }}
->
-  {item.isContinuation ? "Continued: " : ""}
-  {item.answer}
-</div>
-</div>
+          <div
+            style={{
+              border: `2px solid ${colors.border}`,
+              borderRadius: "16px",
+              background:
+                "linear-gradient(135deg, rgba(255,255,255,1) 0%, rgba(255,247,237,0.86) 100%)",
+              padding: "14px 16px",
+              color: colors.answer,
+              fontSize: answerFontSize,
+              lineHeight: "1.42",
+              fontWeight: 800,
+              minHeight: "145px",
+              boxShadow:
+                "0 8px 18px rgba(15,23,42,0.08), inset 0 0 0 1px rgba(255,255,255,0.78)",
+              overflowWrap: "anywhere",
+              wordBreak: "break-word",
+            }}
+          >
+            {item.isContinuation ? "Continued: " : ""}
+            {item.answer}
+          </div>
 
           {examDateText && (
             <div
               style={{
                 marginTop: "14px",
-                display: "inline-block",
+                display: "inline-grid",
+                placeItems: "center",
+                width: "fit-content",
+                minHeight: "30px",
                 borderRadius: "999px",
-                padding: "6px 14px",
-                background: colors.headerBg,
+                padding: "0 16px",
+                background: `linear-gradient(135deg, ${colors.headerBg} 0%, #111827 100%)`,
                 color: "#ffffff",
                 border: `1.8px solid ${colors.border}`,
-                fontSize: "14px",
-                lineHeight: "1.2",
+                fontSize: "12px",
+                lineHeight: "1",
                 fontWeight: 900,
+                textAlign: "center",
+                boxShadow: "0 8px 16px rgba(0,0,0,0.18)",
+                overflowWrap: "anywhere",
+                wordBreak: "break-word",
+                maxWidth: "620px",
               }}
             >
-              {examDateText}
+              <span
+                style={{
+                  display: "block",
+                  transform: "translateY(-2px)",
+                }}
+              >
+                {examDateText}
+              </span>
             </div>
           )}
         </div>
-      </div>
 
-      <div
-        style={{
-          position: "absolute",
-          left: "32px",
-          right: "32px",
-          bottom: "16px",
-          display: "flex",
-          justifyContent: "space-between",
-          color: "rgba(255,255,255,0.82)",
-          fontSize: "12px",
-          fontWeight: 900,
-          zIndex: 2,
-        }}
-      >
-        <span>Study Verse India</span>
-        <span>Subjective Premium PDF</span>
+        <div
+          style={{
+            marginTop: "7px",
+            display: "flex",
+            justifyContent: "space-between",
+            color: "rgba(255,255,255,0.82)",
+            fontSize: "10px",
+            lineHeight: "1",
+            fontWeight: 900,
+            gap: "10px",
+          }}
+        >
+          <span
+            style={{
+              display: "block",
+              transform: "translateY(-1px)",
+            }}
+          >
+            Study Verse India
+          </span>
+
+          <span
+            style={{
+              display: "block",
+              transform: "translateY(-1px)",
+            }}
+          >
+            Subjective Premium PDF
+          </span>
+        </div>
       </div>
     </div>
   );
