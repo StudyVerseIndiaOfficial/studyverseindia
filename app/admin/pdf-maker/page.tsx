@@ -26,6 +26,19 @@ type ThemePreset = {
   answer: string;
   background: string;
   border: string;
+  accent?: string;
+};
+
+type StylePreset = {
+  name: string;
+  headerBorderRadius: string;
+  headerShadow: string;
+  watermarkOpacity: number;
+  pageBorderEnabled: boolean;
+  cornerAccentEnabled: boolean;
+  questionBlockBorderRadius: string;
+  questionBlockShadow: string;
+  chapterStyle?: React.CSSProperties;
 };
 
 const themePresets: ThemePreset[] = [
@@ -39,6 +52,7 @@ const themePresets: ThemePreset[] = [
     answer: "#166534",
     background: "#fff7ed",
     border: "#f59e0b",
+    accent: "#fef3c7",
   },
   {
     name: "Blue + Cyan + White",
@@ -50,6 +64,7 @@ const themePresets: ThemePreset[] = [
     answer: "#047857",
     background: "#eff6ff",
     border: "#06b6d4",
+    accent: "#e0f2fe",
   },
   {
     name: "Purple + Yellow + White",
@@ -61,6 +76,7 @@ const themePresets: ThemePreset[] = [
     answer: "#15803d",
     background: "#faf5ff",
     border: "#a855f7",
+    accent: "#f3e8ff",
   },
   {
     name: "Green + Cream + Black",
@@ -72,6 +88,7 @@ const themePresets: ThemePreset[] = [
     answer: "#0f766e",
     background: "#fffbeb",
     border: "#22c55e",
+    accent: "#dcfce7",
   },
   {
     name: "Black + Red + White",
@@ -83,7 +100,67 @@ const themePresets: ThemePreset[] = [
     answer: "#166534",
     background: "#f8fafc",
     border: "#ef4444",
+    accent: "#fee2e2",
   },
+];
+
+const stylePresets: StylePreset[] = [
+  {
+    name: "Classic Premium",
+    headerBorderRadius: "18px",
+    headerShadow: "0 4px 15px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.1)",
+    watermarkOpacity: 0.04,
+    pageBorderEnabled: true,
+    cornerAccentEnabled: true,
+    questionBlockBorderRadius: "13px",
+    questionBlockShadow: "0 2px 8px rgba(0,0,0,0.04)",
+  },
+  {
+    name: "Modern Glass",
+    headerBorderRadius: "24px",
+    headerShadow: "0 8px 32px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.2)",
+    watermarkOpacity: 0.06,
+    pageBorderEnabled: false,
+    cornerAccentEnabled: false,
+    questionBlockBorderRadius: "16px",
+    questionBlockShadow: "0 4px 16px rgba(0,0,0,0.06)",
+  },
+  {
+    name: "Sharp Edge Pro",
+    headerBorderRadius: "4px",
+    headerShadow: "0 2px 8px rgba(0,0,0,0.25)",
+    watermarkOpacity: 0.03,
+    pageBorderEnabled: true,
+    cornerAccentEnabled: false,
+    questionBlockBorderRadius: "4px",
+    questionBlockShadow: "0 1px 4px rgba(0,0,0,0.08)",
+  },
+  {
+    name: "Soft Rounded",
+    headerBorderRadius: "32px",
+    headerShadow: "0 6px 20px rgba(0,0,0,0.15), inset 0 2px 0 rgba(255,255,255,0.15)",
+    watermarkOpacity: 0.05,
+    pageBorderEnabled: true,
+    cornerAccentEnabled: true,
+    questionBlockBorderRadius: "20px",
+    questionBlockShadow: "0 4px 12px rgba(0,0,0,0.05)",
+  },
+  {
+    name: "Minimal Clean",
+    headerBorderRadius: "12px",
+    headerShadow: "none",
+    watermarkOpacity: 0.02,
+    pageBorderEnabled: false,
+    cornerAccentEnabled: false,
+    questionBlockBorderRadius: "8px",
+    questionBlockShadow: "none",
+  },
+];
+
+const fontFamilies = [
+  { name: "Default (Noto Sans)", value: "'Noto Sans Devanagari', 'Mangal', Arial, sans-serif" },
+  { name: "Poppins Style", value: "'Poppins', 'Noto Sans Devanagari', sans-serif" },
+  { name: "Hind (Best for Hindi)", value: "'Hind', 'Noto Sans Devanagari', 'Mangal', sans-serif" },
 ];
 
 const demoText = `Mukhy Header: Study Verse India Practice PDF
@@ -115,6 +192,7 @@ Q3. बख्तियार खिलजी ने किस विश्वव
 Answer: A
 Exam: BPSC
 Date: 2022`;
+
 function parseBulkText(text: string) {
   const lines = text
     .split("\n")
@@ -157,58 +235,36 @@ function parseBulkText(text: string) {
 
     if (questionMatch) {
       saveCurrent();
-
       current = {
-        number: questionMatch[1]
-          .replace(/\s+/g, "")
-          .replace(/[.)]+$/g, ""),
+        number: questionMatch[1].replace(/\s+/g, "").replace(/[.)]+$/g, ""),
         question: questionMatch[2].trim(),
         options: [],
       };
-
       continue;
     }
 
     const answerMatch = line.match(/^(answer|ans|उत्तर)\s*[:\-]\s*(.+)$/i);
-
     if (answerMatch && current) {
       current.answer = answerMatch[2].trim();
       continue;
     }
 
-    const examDateMatch = line.match(
-      /^(exam date|exam\+date|exam name date|परीक्षा दिनांक)\s*[:\-]\s*(.+)$/i
-    );
-
-    if (examDateMatch && current) {
-      current.exam = examDateMatch[2].trim();
-      continue;
-    }
-
     const examMatch = line.match(/^(exam|exam name|परीक्षा)\s*[:\-]\s*(.+)$/i);
-
     if (examMatch && current) {
       current.exam = examMatch[2].trim();
       continue;
     }
 
-    const dateMatch = line.match(
-      /^(date|exam date|दिनांक|तिथि)\s*[:\-]\s*(.+)$/i
-    );
-
+    const dateMatch = line.match(/^(date|exam date|दिनांक|तिथि)\s*[:\-]\s*(.+)$/i);
     if (dateMatch && current) {
       current.date = dateMatch[2].trim();
       continue;
     }
 
-    const optionMatch = line.match(
-      /^(?:\(([A-Da-d])\)|([A-Da-d])[\.\)])\s*(.+)$/
-    );
-
+    const optionMatch = line.match(/^(?:\(([A-Da-d])\)|([A-Da-d])[\.\)])\s*(.+)$/);
     if (optionMatch && current) {
       const optionLetter = (optionMatch[1] || optionMatch[2]).toUpperCase();
       const optionText = optionMatch[3].trim();
-
       current.options.push(`(${optionLetter}) ${optionText}`);
       continue;
     }
@@ -219,7 +275,6 @@ function parseBulkText(text: string) {
   }
 
   saveCurrent();
-
   return { header, chapter, questions };
 }
 
@@ -227,11 +282,7 @@ function estimateQuestionHeight(question: QuestionItem, layout: LayoutMode) {
   const questionCharsPerLine = layout === "double" ? 48 : 88;
   const optionCharsPerLine = layout === "double" ? 44 : 82;
 
-  const questionLines = Math.max(
-    1,
-    Math.ceil(question.question.length / questionCharsPerLine)
-  );
-
+  const questionLines = Math.max(1, Math.ceil(question.question.length / questionCharsPerLine));
   const optionLines = question.options.reduce((total, option) => {
     return total + Math.max(1, Math.ceil(option.length / optionCharsPerLine));
   }, 0);
@@ -239,7 +290,6 @@ function estimateQuestionHeight(question: QuestionItem, layout: LayoutMode) {
   let height = 26;
   height += questionLines * (layout === "double" ? 18 : 22);
   height += optionLines * (layout === "double" ? 16 : 19);
-
   if (question.exam || question.date) height += 22;
   if (question.answer) height += 26;
 
@@ -247,14 +297,11 @@ function estimateQuestionHeight(question: QuestionItem, layout: LayoutMode) {
 }
 
 function paginateQuestions(questions: QuestionItem[], layout: LayoutMode) {
-const maxHeight = layout === "double" ? 905 : 900;
+  const maxHeight = layout === "double" ? 905 : 900;
   const columnCount = layout === "double" ? 2 : 1;
 
   const pages: QuestionItem[][][] = [];
-  let currentPage: QuestionItem[][] = Array.from(
-    { length: columnCount },
-    () => []
-  );
+  let currentPage: QuestionItem[][] = Array.from({ length: columnCount }, () => []);
   let columnHeights = Array.from({ length: columnCount }, () => 0);
   let columnIndex = 0;
 
@@ -298,28 +345,76 @@ function safeFileName(text: string) {
   );
 }
 
+function waitForImages(container: HTMLElement): Promise<void> {
+  const images = Array.from(container.querySelectorAll("img"));
+  return Promise.all(
+    images.map((img) => {
+      if (img.complete) return Promise.resolve();
+      return new Promise<void>((resolve) => {
+        img.onload = () => resolve();
+        img.onerror = () => resolve();
+      });
+    })
+  ).then(() => {});
+}
+
 export default function PdfMakerPage() {
   const previewRef = useRef<HTMLDivElement | null>(null);
+  const logoInputRef = useRef<HTMLInputElement | null>(null);
 
   const [bulkText, setBulkText] = useState(demoText);
   const [layout, setLayout] = useState<LayoutMode>("single");
   const [selectedTheme, setSelectedTheme] = useState(0);
+  const [selectedStyle, setSelectedStyle] = useState(0);
   const [isDownloading, setIsDownloading] = useState(false);
   const [colors, setColors] = useState<ThemePreset>(themePresets[0]);
+  const [stylePreset, setStylePreset] = useState<StylePreset>(stylePresets[0]);
+
+  const [logoBase64, setLogoBase64] = useState<string>("");
+  const [showWatermark, setShowWatermark] = useState(true);
+  const [watermarkText, setWatermarkText] = useState("Study Verse India");
+  const [brandName, setBrandName] = useState("Study Verse India");
+  const [showBoardFooterText, setShowBoardFooterText] = useState(true);
+  const [boardFooterText, setBoardFooterText] = useState("Premium Digital Board PDF");
+  const [showQR, setShowQR] = useState(true);
+  const [qrValue, setQrValue] = useState("https://studyverseindia.com");
+  const [selectedFont, setSelectedFont] = useState(0);
+  const [headerSubtitle, setHeaderSubtitle] = useState("Practice Question Set");
 
   const parsed = useMemo(() => parseBulkText(bulkText), [bulkText]);
 
- const pages = useMemo(() => {
-  if (layout === "board") {
-    return parsed.questions.map((question) => [[question]]);
-  }
-
-  return paginateQuestions(parsed.questions, layout);
-}, [parsed.questions, layout]);
+  const pages = useMemo(() => {
+    if (layout === "board") {
+      return parsed.questions.map((question) => [[question]]);
+    }
+    return paginateQuestions(parsed.questions, layout);
+  }, [parsed.questions, layout]);
 
   const applyTheme = (index: number) => {
     setSelectedTheme(index);
     setColors(themePresets[index]);
+  };
+
+  const applyStyle = (index: number) => {
+    setSelectedStyle(index);
+    setStylePreset(stylePresets[index]);
+  };
+
+  const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      alert("कृपया केवल image file (PNG, JPG, SVG) upload करें।");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const base64 = event.target?.result as string;
+      setLogoBase64(base64);
+    };
+    reader.readAsDataURL(file);
   };
 
   const downloadPdf = async () => {
@@ -337,34 +432,48 @@ export default function PdfMakerPage() {
     setIsDownloading(true);
 
     try {
-    const isBoardMode = layout === "board";
+      for (const el of pageElements) {
+        await waitForImages(el);
+      }
 
-const pdf = isBoardMode
-  ? new jsPDF({
-      orientation: "landscape",
-      unit: "mm",
-      format: [297, 167.06],
-    })
-  : new jsPDF("p", "mm", "a4");
+      const isBoardMode = layout === "board";
+      const pdf = isBoardMode
+        ? new jsPDF({ orientation: "landscape", unit: "mm", format: [297, 167.06] })
+        : new jsPDF("p", "mm", "a4");
 
-const pdfWidth = isBoardMode ? 297 : 210;
-const pdfHeight = isBoardMode ? 167.06 : 297;
+      const pdfWidth = isBoardMode ? 297 : 210;
+      const pdfHeight = isBoardMode ? 167.06 : 297;
 
       for (let i = 0; i < pageElements.length; i++) {
-        const canvas = await html2canvas(pageElements[i], {
+        const el = pageElements[i];
+        el.scrollTop = 0;
+        el.scrollLeft = 0;
+
+        const canvas = await html2canvas(el, {
           scale: 2,
           useCORS: true,
+          allowTaint: false,
           backgroundColor: colors.background,
           logging: false,
+          scrollY: 0,
+          scrollX: 0,
+          windowWidth: el.clientWidth,
+          windowHeight: el.clientHeight,
         });
 
-        const imgData = canvas.toDataURL("image/jpeg", 0.98);
+        const ctx = canvas.getContext("2d");
+        if (ctx) {
+          ctx.imageSmoothingEnabled = true;
+          ctx.imageSmoothingQuality = "high";
+        }
+
+        const imgData = canvas.toDataURL("image/jpeg", 0.92);
 
         if (i > 0) {
           pdf.addPage();
         }
 
-       pdf.addImage(imgData, "JPEG", 0, 0, pdfWidth, pdfHeight);
+        pdf.addImage(imgData, "JPEG", 0, 0, pdfWidth, pdfHeight);
       }
 
       pdf.save(`${safeFileName(parsed.header)}.pdf`);
@@ -387,14 +496,12 @@ const pdfHeight = isBoardMode ? 167.06 : 297;
             >
               ← Admin Panel
             </Link>
-
             <h1 className="text-3xl font-black text-red-950 md:text-5xl">
               Smart Question to Premium PDF Maker
             </h1>
-
             <p className="mt-2 max-w-3xl text-sm font-bold leading-6 text-gray-600">
-              Bulk question text paste करें, single/double column choose करें,
-              premium color select करें और direct PDF download करें।
+              Bulk question text paste करें, single/double column choose करें, premium color select
+              करें और direct PDF download करें।
             </p>
           </div>
 
@@ -409,14 +516,11 @@ const pdfHeight = isBoardMode ? 167.06 : 297;
 
         <div className="grid gap-6 lg:grid-cols-[430px_1fr]">
           <section className="rounded-[2rem] border border-red-100 bg-white p-5 shadow-xl">
-            <h2 className="mb-4 text-xl font-black text-red-950">
-              PDF Control Panel
-            </h2>
+            <h2 className="mb-4 text-xl font-black text-red-950">PDF Control Panel</h2>
 
             <label className="mb-2 block text-sm font-black text-gray-700">
               Bulk Question Text Paste
             </label>
-
             <textarea
               value={bulkText}
               onChange={(e) => setBulkText(e.target.value)}
@@ -425,45 +529,193 @@ const pdfHeight = isBoardMode ? 167.06 : 297;
             />
 
             <div className="mt-5 grid grid-cols-3 gap-3">
-  <button
-    onClick={() => setLayout("single")}
-    className={`rounded-2xl px-4 py-3 text-xs font-black ${
-      layout === "single"
-        ? "bg-red-900 text-white"
-        : "bg-red-50 text-red-900"
-    }`}
-  >
-    Single
-  </button>
+              <button
+                onClick={() => setLayout("single")}
+                className={`rounded-2xl px-4 py-3 text-xs font-black ${
+                  layout === "single" ? "bg-red-900 text-white" : "bg-red-50 text-red-900"
+                }`}
+              >
+                Single
+              </button>
+              <button
+                onClick={() => setLayout("double")}
+                className={`rounded-2xl px-4 py-3 text-xs font-black ${
+                  layout === "double" ? "bg-red-900 text-white" : "bg-red-50 text-red-900"
+                }`}
+              >
+                Double
+              </button>
+              <button
+                onClick={() => setLayout("board")}
+                className={`rounded-2xl px-4 py-3 text-xs font-black ${
+                  layout === "board" ? "bg-red-900 text-white" : "bg-red-50 text-red-900"
+                }`}
+              >
+                Board PDF
+              </button>
+            </div>
 
-  <button
-    onClick={() => setLayout("double")}
-    className={`rounded-2xl px-4 py-3 text-xs font-black ${
-      layout === "double"
-        ? "bg-red-900 text-white"
-        : "bg-red-50 text-red-900"
-    }`}
-  >
-    Double
-  </button>
+            <div className="mt-6 rounded-2xl border-2 border-dashed border-red-200 bg-red-50/30 p-4">
+              <label className="mb-2 block text-sm font-black text-gray-700">
+                🏷️ Logo Upload (Header Left Corner)
+              </label>
+              <input
+                ref={logoInputRef}
+                type="file"
+                accept="image/png, image/jpeg, image/svg+xml"
+                onChange={handleLogoUpload}
+                className="w-full text-xs font-bold text-gray-600 file:mr-3 file:rounded-xl file:border-0 file:bg-red-900 file:px-4 file:py-2 file:text-xs file:font-black file:text-white"
+              />
+              {logoBase64 && (
+                <div className="mt-2 flex items-center gap-2">
+                  <img
+                    src={logoBase64}
+                    alt="Logo Preview"
+                    className="h-8 w-8 rounded-lg object-contain"
+                  />
+                  <span className="text-xs font-bold text-green-700">✓ Logo Uploaded</span>
+                  <button
+                    onClick={() => setLogoBase64("")}
+                    className="ml-auto text-xs font-bold text-red-600 hover:text-red-800"
+                  >
+                    Remove
+                  </button>
+                </div>
+              )}
+            </div>
 
-  <button
-    onClick={() => setLayout("board")}
-    className={`rounded-2xl px-4 py-3 text-xs font-black ${
-      layout === "board"
-        ? "bg-red-900 text-white"
-        : "bg-red-50 text-red-900"
-    }`}
-  >
-    Board PDF
-  </button>
-</div>
+            <div className="mt-4">
+              <label className="mb-2 block text-sm font-black text-gray-700">
+                📝 Header Subtitle
+              </label>
+              <input
+                type="text"
+                value={headerSubtitle}
+                onChange={(e) => setHeaderSubtitle(e.target.value)}
+                className="w-full rounded-2xl border border-red-100 bg-white px-4 py-2 text-xs font-bold outline-none"
+                placeholder="Practice Question Set"
+              />
+            </div>
+
+            <div className="mt-4">
+              <label className="mb-2 block text-sm font-black text-gray-700">
+                📛 Brand Name (Footer Left)
+              </label>
+              <input
+                type="text"
+                value={brandName}
+                onChange={(e) => setBrandName(e.target.value)}
+                className="w-full rounded-2xl border border-red-100 bg-white px-4 py-2 text-xs font-bold outline-none"
+                placeholder="Study Verse India"
+              />
+            </div>
+
+            <div className="mt-4">
+              <label className="mb-2 block text-sm font-black text-gray-700">
+                🔤 Font Family (Devanagari Support)
+              </label>
+              <select
+                value={selectedFont}
+                onChange={(e) => setSelectedFont(Number(e.target.value))}
+                className="w-full rounded-2xl border border-red-100 bg-white px-4 py-3 text-sm font-black outline-none"
+              >
+                {fontFamilies.map((font, index) => (
+                  <option key={font.value} value={index}>
+                    {font.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="mt-4">
+              <label className="mb-2 block text-sm font-black text-gray-700">
+                🎭 Premium PDF Style
+              </label>
+              <select
+                value={selectedStyle}
+                onChange={(e) => applyStyle(Number(e.target.value))}
+                className="w-full rounded-2xl border border-red-100 bg-white px-4 py-3 text-sm font-black outline-none"
+              >
+                {stylePresets.map((style, index) => (
+                  <option key={style.name} value={index}>
+                    {style.name}
+                  </option>
+                ))}
+              </select>
+              <p className="mt-1 text-xs text-gray-500">
+                Header shape, shadows, border style बदलें।
+              </p>
+            </div>
+
+            <div className="mt-4 grid grid-cols-1 gap-3">
+              <label className="flex cursor-pointer items-center gap-2 rounded-2xl border border-red-100 bg-white p-3">
+                <input
+                  type="checkbox"
+                  checked={showWatermark}
+                  onChange={(e) => setShowWatermark(e.target.checked)}
+                  className="h-5 w-5 accent-red-900"
+                />
+                <span className="text-xs font-black text-gray-700">Show Watermark</span>
+              </label>
+              {showWatermark && (
+                <input
+                  type="text"
+                  value={watermarkText}
+                  onChange={(e) => setWatermarkText(e.target.value)}
+                  placeholder="Watermark Text"
+                  className="w-full rounded-2xl border border-red-100 bg-white px-4 py-2 text-xs font-bold outline-none"
+                />
+              )}
+            </div>
+
+            {layout === "board" && (
+              <div className="mt-4 grid grid-cols-1 gap-3">
+                <label className="flex cursor-pointer items-center gap-2 rounded-2xl border border-red-100 bg-white p-3">
+                  <input
+                    type="checkbox"
+                    checked={showBoardFooterText}
+                    onChange={(e) => setShowBoardFooterText(e.target.checked)}
+                    className="h-5 w-5 accent-red-900"
+                  />
+                  <span className="text-xs font-black text-gray-700">Show Board Footer Text</span>
+                </label>
+                {showBoardFooterText && (
+                  <input
+                    type="text"
+                    value={boardFooterText}
+                    onChange={(e) => setBoardFooterText(e.target.value)}
+                    placeholder="Board Footer Text"
+                    className="w-full rounded-2xl border border-red-100 bg-white px-4 py-2 text-xs font-bold outline-none"
+                  />
+                )}
+              </div>
+            )}
+
+            <div className="mt-4 grid grid-cols-1 gap-3">
+              <label className="flex cursor-pointer items-center gap-2 rounded-2xl border border-red-100 bg-white p-3">
+                <input
+                  type="checkbox"
+                  checked={showQR}
+                  onChange={(e) => setShowQR(e.target.checked)}
+                  className="h-5 w-5 accent-red-900"
+                />
+                <span className="text-xs font-black text-gray-700">QR Code</span>
+              </label>
+              {showQR && (
+                <input
+                  type="text"
+                  value={qrValue}
+                  onChange={(e) => setQrValue(e.target.value)}
+                  className="w-full rounded-2xl border border-red-100 bg-white px-4 py-2 text-xs font-bold outline-none"
+                  placeholder="https://studyverseindia.com"
+                />
+              )}
+            </div>
 
             <div className="mt-6">
               <label className="mb-2 block text-sm font-black text-gray-700">
-                Auto Premium Color Combination
+                🎨 Auto Premium Color Combination
               </label>
-
               <select
                 value={selectedTheme}
                 onChange={(e) => applyTheme(Number(e.target.value))}
@@ -486,9 +738,7 @@ const pdfHeight = isBoardMode ? 167.06 : 297;
               <ColorInput
                 label="Header Text"
                 value={colors.headerText}
-                onChange={(value) =>
-                  setColors({ ...colors, headerText: value })
-                }
+                onChange={(value) => setColors({ ...colors, headerText: value })}
               />
               <ColorInput
                 label="Chapter"
@@ -513,9 +763,7 @@ const pdfHeight = isBoardMode ? 167.06 : 297;
               <ColorInput
                 label="Background"
                 value={colors.background}
-                onChange={(value) =>
-                  setColors({ ...colors, background: value })
-                }
+                onChange={(value) => setColors({ ...colors, background: value })}
               />
               <ColorInput
                 label="Border"
@@ -529,8 +777,7 @@ const pdfHeight = isBoardMode ? 167.06 : 297;
                 Parsed Questions: {parsed.questions.length}
               </p>
               <p className="mt-1 text-xs font-bold text-gray-600">
-                Question cut protection enabled: fit नहीं होगा तो next
-                column/page में जाएगा।
+                Question cut protection enabled: fit नहीं होगा तो next column/page में जाएगा।
               </p>
             </div>
           </section>
@@ -538,20 +785,15 @@ const pdfHeight = isBoardMode ? 167.06 : 297;
           <section className="min-w-0 rounded-[2rem] border border-red-100 bg-white p-4 shadow-xl">
             <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
               <div>
-                <h2 className="text-xl font-black text-red-950">
-                  Live PDF Preview
-                </h2>
-                <p className="text-xs font-bold text-gray-500">
-                  यही layout PDF में download होगा।
-                </p>
+                <h2 className="text-xl font-black text-red-950">Live PDF Preview</h2>
+                <p className="text-xs font-bold text-gray-500">यही layout PDF में download होगा।</p>
               </div>
-
               <span className="rounded-full bg-red-50 px-4 py-2 text-xs font-black text-red-800">
                 {layout === "board"
-  ? "Digital Board Slide PDF"
-  : layout === "single"
-    ? "Single Column A4"
-    : "Double Column A4"}
+                  ? "Digital Board Slide PDF"
+                  : layout === "single"
+                  ? "Single Column A4"
+                  : "Double Column A4"}
               </span>
             </div>
 
@@ -564,40 +806,56 @@ const pdfHeight = isBoardMode ? 167.06 : 297;
                     </p>
                   </div>
                 ) : (
-             pages.map((page, pageIndex) => {
-  if (layout === "board") {
-    const question = page[0]?.[0];
+                  pages.map((page, pageIndex) => {
+                    if (layout === "board") {
+                      const question = page[0]?.[0];
+                      if (!question) return null;
+                      return (
+                        <BoardPreviewPage
+                          key={pageIndex}
+                          question={question}
+                          pageNumber={pageIndex + 1}
+                          totalPages={pages.length}
+                          header={parsed.header}
+                          chapter={parsed.chapter}
+                          colors={colors}
+                          stylePreset={stylePreset}
+                          logoBase64={logoBase64}
+                          showWatermark={showWatermark}
+                          watermarkText={watermarkText}
+                          showQR={showQR}
+                          qrValue={qrValue}
+                          fontFamily={fontFamilies[selectedFont].value}
+                          brandName={brandName}
+                          showBoardFooterText={showBoardFooterText}
+                          boardFooterText={boardFooterText}
+                          headerSubtitle={headerSubtitle}
+                        />
+                      );
+                    }
 
-    if (!question) {
-      return null;
-    }
-
-    return (
-      <BoardPreviewPage
-        key={pageIndex}
-        question={question}
-        pageNumber={pageIndex + 1}
-        totalPages={pages.length}
-        header={parsed.header}
-        chapter={parsed.chapter}
-        colors={colors}
-      />
-    );
-  }
-
-  return (
-    <PdfPreviewPage
-      key={pageIndex}
-      page={page}
-      pageNumber={pageIndex + 1}
-      totalPages={pages.length}
-      header={parsed.header}
-      chapter={parsed.chapter}
-      colors={colors}
-      layout={layout}
-    />
-  );
-})
+                    return (
+                      <PdfPreviewPage
+                        key={pageIndex}
+                        page={page}
+                        pageNumber={pageIndex + 1}
+                        totalPages={pages.length}
+                        header={parsed.header}
+                        chapter={parsed.chapter}
+                        colors={colors}
+                        stylePreset={stylePreset}
+                        layout={layout}
+                        logoBase64={logoBase64}
+                        showWatermark={showWatermark}
+                        watermarkText={watermarkText}
+                        showQR={showQR}
+                        qrValue={qrValue}
+                        fontFamily={fontFamilies[selectedFont].value}
+                        brandName={brandName}
+                        headerSubtitle={headerSubtitle}
+                      />
+                    );
+                  })
                 )}
               </div>
             </div>
@@ -619,10 +877,7 @@ function ColorInput({
 }) {
   return (
     <label className="block">
-      <span className="mb-2 block text-xs font-black text-gray-600">
-        {label}
-      </span>
-
+      <span className="mb-2 block text-xs font-black text-gray-600">{label}</span>
       <div className="flex items-center gap-2 rounded-2xl border border-red-100 bg-white p-2">
         <input
           type="color"
@@ -630,7 +885,6 @@ function ColorInput({
           onChange={(e) => onChange(e.target.value)}
           className="h-10 w-12 cursor-pointer rounded-xl border-0 bg-transparent"
         />
-
         <input
           value={value}
           onChange={(e) => onChange(e.target.value)}
@@ -648,7 +902,16 @@ function PdfPreviewPage({
   header,
   chapter,
   colors,
+  stylePreset,
   layout,
+  logoBase64,
+  showWatermark,
+  watermarkText,
+  showQR,
+  qrValue,
+  fontFamily,
+  brandName,
+  headerSubtitle,
 }: {
   page: QuestionItem[][];
   pageNumber: number;
@@ -656,7 +919,16 @@ function PdfPreviewPage({
   header: string;
   chapter: string;
   colors: ThemePreset;
+  stylePreset: StylePreset;
   layout: LayoutMode;
+  logoBase64: string;
+  showWatermark: boolean;
+  watermarkText: string;
+  showQR: boolean;
+  qrValue: string;
+  fontFamily: string;
+  brandName: string;
+  headerSubtitle: string;
 }) {
   const pageStyle: React.CSSProperties = {
     width: "794px",
@@ -664,49 +936,168 @@ function PdfPreviewPage({
     minHeight: "1123px",
     maxHeight: "1123px",
     background: colors.background,
-    padding: "24px",
+    padding: "20px",
     boxSizing: "border-box",
     position: "relative",
     overflow: "hidden",
-    fontFamily: "'Noto Sans Devanagari', 'Mangal', Arial, sans-serif",
+    fontFamily: fontFamily,
     color: "#111827",
   };
 
-  const headerStyle: React.CSSProperties = {
-    borderRadius: "18px",
-    border: `3px solid ${colors.border}`,
-    padding: "12px 18px",
-    textAlign: "center",
-    background: colors.headerBg,
-    color: colors.headerText,
+  const headerContainerStyle: React.CSSProperties = {
+    position: "relative",
+    borderRadius: stylePreset.headerBorderRadius,
+    border: `2px solid ${colors.border}`,
+    background: `linear-gradient(160deg, ${colors.headerBg} 0%, ${adjustColor(colors.headerBg, -30)} 50%, ${adjustColor(colors.headerBg, -15)} 100%)`,
+    padding: "18px 24px",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    minHeight: "72px",
+    boxShadow: `0 6px 24px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.1), inset 0 -1px 0 rgba(0,0,0,0.15)`,
+    overflow: "visible",
   };
 
   const chapterStyle: React.CSSProperties = {
     display: "inline-block",
     borderRadius: "14px",
     border: `2px solid ${colors.border}`,
-    background: "#ffffff",
-    padding: "7px 18px",
+    background: `linear-gradient(135deg, #ffffff 0%, ${colors.accent || colors.background} 100%)`,
+    padding: "8px 24px",
     color: colors.chapter,
     fontSize: "20px",
     lineHeight: "1.2",
     fontWeight: 900,
+    boxShadow: `0 3px 10px rgba(0,0,0,0.08)`,
+    ...(stylePreset.chapterStyle || {}),
   };
+
+  const pageBorderStyle: React.CSSProperties = stylePreset.pageBorderEnabled
+    ? {
+        position: "absolute",
+        inset: "8px",
+        border: `2px solid ${colors.border}`,
+        borderRadius: "12px",
+        opacity: 0.3,
+        pointerEvents: "none",
+      }
+    : { display: "none" };
 
   return (
     <div data-pdf-page="true" style={pageStyle}>
-      <div style={headerStyle}>
-        <h1
+      {stylePreset.pageBorderEnabled && <div style={pageBorderStyle} />}
+      {stylePreset.cornerAccentEnabled && (
+        <>
+          <CornerAccent position="top-left" color={colors.border} />
+          <CornerAccent position="top-right" color={colors.border} />
+          <CornerAccent position="bottom-left" color={colors.border} />
+          <CornerAccent position="bottom-right" color={colors.border} />
+        </>
+      )}
+
+      {showWatermark && watermarkText && (
+        <div
           style={{
-            margin: 0,
-            fontSize: "26px",
-            lineHeight: "1.18",
-            fontWeight: 900,
-            letterSpacing: "0.2px",
+            position: "absolute",
+            inset: 0,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            pointerEvents: "none",
+            zIndex: 1,
+            opacity: stylePreset.watermarkOpacity,
           }}
         >
-          {header}
-        </h1>
+          <span
+            style={{
+              fontSize: "120px",
+              fontWeight: 900,
+              color: colors.headerBg,
+              transform: "rotate(-35deg)",
+              whiteSpace: "nowrap",
+              letterSpacing: "8px",
+            }}
+          >
+            {watermarkText}
+          </span>
+        </div>
+      )}
+
+      {/* PREMIUM HEADER */}
+      <div style={headerContainerStyle}>
+        {/* LOGO – Simple top-left placement, no special shape */}
+        {logoBase64 && (
+          <div
+            style={{
+              position: "absolute",
+              left: "16px",
+              top: "50%",
+              transform: "translateY(-50%)",
+              maxWidth: "70px",
+              maxHeight: "70px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              zIndex: 3,
+              background: "rgba(255,255,255,0.9)", // light background for visibility
+              borderRadius: "6px",
+              padding: "4px",
+            }}
+          >
+            <img
+              src={logoBase64}
+              alt="Logo"
+              style={{
+                maxWidth: "100%",
+                maxHeight: "100%",
+                objectFit: "contain",
+              }}
+            />
+          </div>
+        )}
+
+        {/* CENTER HEADING */}
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            gap: "2px",
+            paddingLeft: logoBase64 ? "80px" : "0",
+            paddingRight: logoBase64 ? "80px" : "0",
+          }}
+        >
+          <h1
+            style={{
+              margin: 0,
+              fontSize: "27px",
+              lineHeight: "1.15",
+              fontWeight: 900,
+              letterSpacing: "0.8px",
+              color: colors.headerText,
+              textAlign: "center",
+              textShadow: "0 2px 6px rgba(0,0,0,0.35)",
+              textTransform: "uppercase",
+            }}
+          >
+            {header}
+          </h1>
+          {headerSubtitle && (
+            <span
+              style={{
+                fontSize: "11px",
+                fontWeight: 600,
+                letterSpacing: "2px",
+                color: colors.headerText,
+                opacity: 0.75,
+                textTransform: "uppercase",
+                textShadow: "0 1px 3px rgba(0,0,0,0.3)",
+              }}
+            >
+              {headerSubtitle}
+            </span>
+          )}
+        </div>
       </div>
 
       <div style={{ marginTop: "10px", textAlign: "center" }}>
@@ -715,10 +1106,21 @@ function PdfPreviewPage({
 
       <div
         style={{
+          marginTop: "10px",
+          height: "3px",
+          background: `linear-gradient(90deg, transparent 0%, ${colors.border} 50%, transparent 100%)`,
+          borderRadius: "2px",
+        }}
+      />
+
+      <div
+        style={{
           marginTop: "14px",
           display: "grid",
           gridTemplateColumns: layout === "double" ? "1fr 1fr" : "1fr",
           gap: layout === "double" ? "10px" : "12px",
+          position: "relative",
+          zIndex: 2,
         }}
       >
         {page.map((column, columnIndex) => (
@@ -729,6 +1131,8 @@ function PdfPreviewPage({
                 question={question}
                 colors={colors}
                 layout={layout}
+                fontFamily={fontFamily}
+                stylePreset={stylePreset}
               />
             ))}
           </div>
@@ -740,20 +1144,28 @@ function PdfPreviewPage({
           position: "absolute",
           left: "24px",
           right: "24px",
-          bottom: "12px",
-          borderTop: "1px solid #d1d5db",
-          paddingTop: "7px",
+          bottom: "16px",
+          borderTop: `1px solid ${colors.border}`,
+          paddingTop: "8px",
           display: "flex",
           justifyContent: "space-between",
+          alignItems: "center",
           color: "#4b5563",
           fontSize: "10px",
           fontWeight: 900,
+          zIndex: 2,
         }}
       >
-        <span>Study Verse India</span>
+        <span>📚 {brandName}</span>
         <span>
           Page {pageNumber} / {totalPages}
         </span>
+        {showQR && (
+          <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+            <QRCodeDisplay value={qrValue} size={28} />
+            <span style={{ fontSize: "8px" }}>Scan for more</span>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -763,10 +1175,14 @@ function QuestionBlock({
   question,
   colors,
   layout,
+  fontFamily,
+  stylePreset,
 }: {
   question: QuestionItem;
   colors: ThemePreset;
   layout: LayoutMode;
+  fontFamily: string;
+  stylePreset: StylePreset;
 }) {
   const examDateText = [question.exam, question.date].filter(Boolean).join(" ");
 
@@ -775,12 +1191,14 @@ function QuestionBlock({
       style={{
         marginBottom: layout === "double" ? "8px" : "10px",
         border: `1.6px solid ${colors.border}`,
-        borderRadius: "13px",
-        background: "#ffffff",
+        borderRadius: stylePreset.questionBlockBorderRadius,
+        background: `linear-gradient(135deg, #ffffff 0%, ${colors.accent || colors.background}40 100%)`,
         padding: layout === "double" ? "8px" : "10px",
         boxSizing: "border-box",
         breakInside: "avoid",
         pageBreakInside: "avoid",
+        boxShadow: stylePreset.questionBlockShadow,
+        fontFamily: fontFamily,
       }}
     >
       <div
@@ -805,6 +1223,7 @@ function QuestionBlock({
               lineHeight: "1.35",
               fontWeight: 800,
               marginBottom: "2px",
+              paddingLeft: "4px",
             }}
           >
             {option}
@@ -819,7 +1238,7 @@ function QuestionBlock({
             display: "inline-block",
             borderRadius: "999px",
             padding: layout === "double" ? "3px 8px" : "4px 10px",
-            background: colors.background,
+            background: colors.headerBg + "15",
             color: colors.headerBg,
             border: `1px solid ${colors.border}`,
             fontSize: layout === "double" ? "9.5px" : "11px",
@@ -838,7 +1257,7 @@ function QuestionBlock({
             borderRadius: "9px",
             padding: layout === "double" ? "5px 8px" : "6px 9px",
             background: "#ecfdf5",
-            border: `1px solid ${colors.answer}`,
+            border: `1.5px solid ${colors.answer}`,
           }}
         >
           <span
@@ -848,13 +1267,14 @@ function QuestionBlock({
               fontWeight: 900,
             }}
           >
-            Answer: {question.answer}
+            ✓ Answer: {question.answer}
           </span>
         </div>
       )}
     </div>
   );
 }
+
 function BoardPreviewPage({
   question,
   pageNumber,
@@ -862,6 +1282,17 @@ function BoardPreviewPage({
   header,
   chapter,
   colors,
+  stylePreset,
+  logoBase64,
+  showWatermark,
+  watermarkText,
+  showQR,
+  qrValue,
+  fontFamily,
+  brandName,
+  showBoardFooterText,
+  boardFooterText,
+  headerSubtitle,
 }: {
   question: QuestionItem;
   pageNumber: number;
@@ -869,19 +1300,24 @@ function BoardPreviewPage({
   header: string;
   chapter: string;
   colors: ThemePreset;
+  stylePreset: StylePreset;
+  logoBase64: string;
+  showWatermark: boolean;
+  watermarkText: string;
+  showQR: boolean;
+  qrValue: string;
+  fontFamily: string;
+  brandName: string;
+  showBoardFooterText: boolean;
+  boardFooterText: string;
+  headerSubtitle: string;
 }) {
   const examDateText = [question.exam, question.date].filter(Boolean).join(" ");
 
   const questionFontSize =
-    question.question.length > 150
-      ? "20px"
-      : question.question.length > 95
-        ? "23px"
-        : "26px";
+    question.question.length > 150 ? "20px" : question.question.length > 95 ? "23px" : "26px";
 
-  const optionFontSize = question.options.some((option) => option.length > 45)
-    ? "15px"
-    : "17px";
+  const optionFontSize = question.options.some((option) => option.length > 45) ? "15px" : "17px";
 
   return (
     <div
@@ -894,7 +1330,7 @@ function BoardPreviewPage({
         boxSizing: "border-box",
         position: "relative",
         overflow: "hidden",
-        fontFamily: "'Noto Sans Devanagari', 'Mangal', Arial, sans-serif",
+        fontFamily: fontFamily,
         color: "#ffffff",
       }}
     >
@@ -907,7 +1343,6 @@ function BoardPreviewPage({
           opacity: 0.95,
         }}
       />
-
       <div
         style={{
           position: "absolute",
@@ -920,7 +1355,6 @@ function BoardPreviewPage({
           opacity: 0.16,
         }}
       />
-
       <div
         style={{
           position: "absolute",
@@ -934,6 +1368,34 @@ function BoardPreviewPage({
         }}
       />
 
+      {showWatermark && watermarkText && (
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            pointerEvents: "none",
+            zIndex: 1,
+            opacity: stylePreset.watermarkOpacity + 0.01,
+          }}
+        >
+          <span
+            style={{
+              fontSize: "80px",
+              fontWeight: 900,
+              color: "#ffffff",
+              transform: "rotate(-30deg)",
+              whiteSpace: "nowrap",
+              letterSpacing: "6px",
+            }}
+          >
+            {watermarkText}
+          </span>
+        </div>
+      )}
+
       <div
         style={{
           position: "relative",
@@ -943,95 +1405,119 @@ function BoardPreviewPage({
           flexDirection: "column",
         }}
       >
+        {/* BOARD HEADER */}
         <div
           style={{
             position: "relative",
-            minHeight: "42px",
+            minHeight: "52px",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
           }}
         >
+          {/* LOGO – Simple placement */}
+          {logoBase64 && (
+            <div
+              style={{
+                position: "absolute",
+                left: "8px",
+                top: "50%",
+                transform: "translateY(-50%)",
+                maxWidth: "60px",
+                maxHeight: "60px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                zIndex: 4,
+                background: "rgba(255,255,255,0.9)",
+                borderRadius: "6px",
+                padding: "4px",
+              }}
+            >
+              <img
+                src={logoBase64}
+                alt="Logo"
+                style={{
+                  maxWidth: "100%",
+                  maxHeight: "100%",
+                  objectFit: "contain",
+                }}
+              />
+            </div>
+          )}
+
+          {/* Header Title Pill */}
           <div
             style={{
               width: "fit-content",
-              maxWidth: "610px",
-              minHeight: "36px",
-              padding: "0 26px",
+              maxWidth: logoBase64 ? "480px" : "610px",
+              minHeight: "40px",
+              padding: "0 30px",
               borderRadius: "999px",
               background: `linear-gradient(135deg, ${colors.headerText} 0%, #ffffff 45%, ${colors.headerText} 100%)`,
               color: colors.headerBg,
               border: `2px solid ${colors.border}`,
-              fontSize: "18px",
+              fontSize: "19px",
               lineHeight: "1",
               fontWeight: 900,
-              letterSpacing: "0.3px",
-              boxShadow:
-                "0 10px 24px rgba(0,0,0,0.28), inset 0 0 0 1px rgba(255,255,255,0.45)",
+              letterSpacing: "0.5px",
+              boxShadow: "0 12px 28px rgba(0,0,0,0.35), inset 0 0 0 1px rgba(255,255,255,0.6)",
               textAlign: "center",
-              display: "grid",
-              placeItems: "center",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: "1px",
               overflowWrap: "anywhere",
               wordBreak: "break-word",
             }}
           >
-            <span
-              style={{
-                display: "block",
-                transform: "translateY(-2px)",
-              }}
-            >
+            <span style={{ display: "block", transform: "translateY(-1px)", fontSize: "19px", fontWeight: 900 }}>
               {header}
             </span>
+            {headerSubtitle && (
+              <span style={{ display: "block", fontSize: "9px", fontWeight: 700, opacity: 0.7, letterSpacing: "1.5px", textTransform: "uppercase" }}>
+                {headerSubtitle}
+              </span>
+            )}
           </div>
 
+          {/* Slide Counter */}
           <div
             style={{
               position: "absolute",
               right: "0",
-              top: "3px",
-              minHeight: "34px",
-              padding: "0 15px",
+              top: "4px",
+              minHeight: "30px",
+              padding: "0 14px",
               borderRadius: "999px",
               border: `2px solid ${colors.border}`,
               color: "#ffffff",
-              fontSize: "13px",
+              fontSize: "12px",
               lineHeight: "1",
               fontWeight: 900,
-              background:
-                "linear-gradient(135deg, rgba(255,255,255,0.14), rgba(255,255,255,0.04))",
-              boxShadow: "0 8px 18px rgba(0,0,0,0.25)",
+              background: "linear-gradient(135deg, rgba(255,255,255,0.18), rgba(255,255,255,0.05))",
+              boxShadow: "0 6px 16px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.15)",
               whiteSpace: "nowrap",
               textAlign: "center",
               display: "grid",
               placeItems: "center",
+              zIndex: 3,
             }}
           >
-            <span
-              style={{
-                display: "block",
-                transform: "translateY(-2px)",
-              }}
-            >
+            <span style={{ display: "block", transform: "translateY(-1px)", fontSize: "12px" }}>
               Slide {pageNumber}/{totalPages}
             </span>
           </div>
         </div>
 
-        <div
-          style={{
-            marginTop: "8px",
-            display: "flex",
-            justifyContent: "center",
-          }}
-        >
+        <div style={{ marginTop: "8px", display: "flex", justifyContent: "center" }}>
           <div
             style={{
               width: "fit-content",
               maxWidth: "760px",
               minHeight: "38px",
-              background:
-                "linear-gradient(135deg, #ffffff 0%, #fff7ed 50%, #ffffff 100%)",
+              background: "linear-gradient(135deg, #ffffff 0%, #fff7ed 50%, #ffffff 100%)",
               color: colors.chapter,
               border: `2px solid ${colors.border}`,
               padding: "0 28px",
@@ -1040,8 +1526,7 @@ function BoardPreviewPage({
               lineHeight: "1",
               fontWeight: 900,
               letterSpacing: "0.2px",
-              boxShadow:
-                "0 10px 24px rgba(0,0,0,0.25), inset 0 0 0 1px rgba(255,255,255,0.8)",
+              boxShadow: "0 10px 24px rgba(0,0,0,0.25), inset 0 0 0 1px rgba(255,255,255,0.8)",
               textAlign: "center",
               overflowWrap: "anywhere",
               wordBreak: "break-word",
@@ -1049,17 +1534,13 @@ function BoardPreviewPage({
               placeItems: "center",
             }}
           >
-            <span
-              style={{
-                display: "block",
-                transform: "translateY(-2px)",
-              }}
-            >
+            <span style={{ display: "block", transform: "translateY(-2px)" }}>
               {chapter}
             </span>
           </div>
         </div>
 
+        {/* Question card and rest unchanged */}
         <div
           style={{
             marginTop: "12px",
@@ -1067,17 +1548,15 @@ function BoardPreviewPage({
             background: "linear-gradient(180deg, #ffffff 0%, #f8fafc 100%)",
             color: "#111827",
             border: `3px solid ${colors.border}`,
-            borderRadius: "22px",
+            borderRadius: stylePreset.questionBlockBorderRadius,
             padding: "18px",
-            boxShadow:
-              "0 18px 38px rgba(0,0,0,0.34), inset 0 0 0 1px rgba(255,255,255,0.75)",
+            boxShadow: "0 18px 38px rgba(0,0,0,0.34), inset 0 0 0 1px rgba(255,255,255,0.75)",
             display: "flex",
             flexDirection: "column",
             overflow: "hidden",
             position: "relative",
           }}
         >
-          {/* Top Row: Exam + Date */}
           <div
             style={{
               display: "flex",
@@ -1108,12 +1587,7 @@ function BoardPreviewPage({
                   wordBreak: "break-word",
                 }}
               >
-                <span
-                  style={{
-                    display: "block",
-                    transform: "translateY(-2px)",
-                  }}
-                >
+                <span style={{ display: "block", transform: "translateY(-2px)" }}>
                   {examDateText}
                 </span>
               </div>
@@ -1122,7 +1596,6 @@ function BoardPreviewPage({
             )}
           </div>
 
-          {/* Question */}
           <div
             style={{
               color: colors.question,
@@ -1138,7 +1611,6 @@ function BoardPreviewPage({
             {question.number}. {question.question}
           </div>
 
-          {/* Options */}
           <div
             style={{
               display: "grid",
@@ -1152,11 +1624,10 @@ function BoardPreviewPage({
                 key={option}
                 style={{
                   border: `2px solid ${colors.border}`,
-                  borderRadius: "14px",
+                  borderRadius: stylePreset.questionBlockBorderRadius,
                   padding: "0 12px",
                   minHeight: "42px",
-                  background:
-                    "linear-gradient(135deg, rgba(255,255,255,1) 0%, rgba(248,250,252,1) 100%)",
+                  background: "linear-gradient(135deg, rgba(255,255,255,1) 0%, rgba(248,250,252,1) 100%)",
                   color: colors.option,
                   fontSize: optionFontSize,
                   lineHeight: "1",
@@ -1168,23 +1639,16 @@ function BoardPreviewPage({
                   overflowWrap: "anywhere",
                   wordBreak: "break-word",
                   overflow: "hidden",
-                  boxShadow:
-                    "0 6px 14px rgba(15,23,42,0.08), inset 0 0 0 1px rgba(255,255,255,0.7)",
+                  boxShadow: stylePreset.questionBlockShadow,
                 }}
               >
-                <span
-                  style={{
-                    display: "block",
-                    transform: "translateY(-2px)",
-                  }}
-                >
+                <span style={{ display: "block", transform: "translateY(-2px)" }}>
                   {option}
                 </span>
               </div>
             ))}
           </div>
 
-          {/* Bottom Row: Answer */}
           <div
             style={{
               marginTop: "auto",
@@ -1212,13 +1676,8 @@ function BoardPreviewPage({
                   boxShadow: "0 8px 16px rgba(16,185,129,0.12)",
                 }}
               >
-                <span
-                  style={{
-                    display: "block",
-                    transform: "translateY(-2px)",
-                  }}
-                >
-                  Answer: {question.answer}
+                <span style={{ display: "block", transform: "translateY(-2px)" }}>
+                  ✓ Answer: {question.answer}
                 </span>
               </div>
             ) : (
@@ -1232,6 +1691,7 @@ function BoardPreviewPage({
             marginTop: "7px",
             display: "flex",
             justifyContent: "space-between",
+            alignItems: "center",
             color: "rgba(255,255,255,0.82)",
             fontSize: "10px",
             lineHeight: "1",
@@ -1239,25 +1699,99 @@ function BoardPreviewPage({
             gap: "10px",
           }}
         >
-          <span
-            style={{
-              display: "block",
-              transform: "translateY(-1px)",
-            }}
-          >
-            Study Verse India
+          <span style={{ display: "block", transform: "translateY(-1px)" }}>
+            📚 {brandName}
           </span>
-
-          <span
-            style={{
-              display: "block",
-              transform: "translateY(-1px)",
-            }}
-          >
-            Premium Digital Board PDF
-          </span>
+          {showBoardFooterText && (
+            <span style={{ display: "block", transform: "translateY(-1px)" }}>
+              {boardFooterText}
+            </span>
+          )}
+          {showQR && (
+            <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+              <QRCodeDisplay value={qrValue} size={22} />
+            </div>
+          )}
         </div>
       </div>
     </div>
   );
+}
+
+function CornerAccent({
+  position,
+  color,
+}: {
+  position: "top-left" | "top-right" | "bottom-left" | "bottom-right";
+  color: string;
+}) {
+  const style: React.CSSProperties = {
+    position: "absolute",
+    width: "16px",
+    height: "16px",
+    border: `2px solid ${color}`,
+    opacity: 0.6,
+    ...(position === "top-left" && {
+      top: "14px",
+      left: "14px",
+      borderRight: "none",
+      borderBottom: "none",
+      borderRadius: "6px 0 0 0",
+    }),
+    ...(position === "top-right" && {
+      top: "14px",
+      right: "14px",
+      borderLeft: "none",
+      borderBottom: "none",
+      borderRadius: "0 6px 0 0",
+    }),
+    ...(position === "bottom-left" && {
+      bottom: "14px",
+      left: "14px",
+      borderRight: "none",
+      borderTop: "none",
+      borderRadius: "0 0 0 6px",
+    }),
+    ...(position === "bottom-right" && {
+      bottom: "14px",
+      right: "14px",
+      borderLeft: "none",
+      borderTop: "none",
+      borderRadius: "0 0 6px 0",
+    }),
+  };
+  return <div style={style} />;
+}
+
+function QRCodeDisplay({ value, size }: { value: string; size: number }) {
+  const encodedUrl = encodeURIComponent(value);
+  const qrApiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${encodedUrl}&margin=0`;
+
+  return (
+    <div
+      style={{
+        width: `${size}px`,
+        height: `${size}px`,
+        borderRadius: "4px",
+        overflow: "hidden",
+        border: "1px solid rgba(0,0,0,0.2)",
+        background: "#ffffff",
+      }}
+    >
+      <img
+        src={qrApiUrl}
+        alt="QR Code"
+        style={{ width: "100%", height: "100%" }}
+        crossOrigin="anonymous"
+      />
+    </div>
+  );
+}
+
+function adjustColor(hex: string, amount: number): string {
+  const num = parseInt(hex.replace("#", ""), 16);
+  const r = Math.min(255, Math.max(0, (num >> 16) + amount));
+  const g = Math.min(255, Math.max(0, ((num >> 8) & 0x00ff) + amount));
+  const b = Math.min(255, Math.max(0, (num & 0x0000ff) + amount));
+  return `#${((r << 16) | (g << 8) | b).toString(16).padStart(6, "0")}`;
 }
