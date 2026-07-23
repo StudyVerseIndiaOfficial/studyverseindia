@@ -323,11 +323,18 @@ export default function AdminDashboardPage() {
   >
     Subjective PDF Maker
   </a>
+  <a
+  href="/admin/notes-maker"
+  className="inline-flex items-center justify-center rounded-2xl bg-blue-900 px-5 py-3 text-sm font-black text-white shadow-lg transition hover:bg-blue-800"
+>
+  📚 Notes Maker
+</a>
 
   <button
     onClick={logoutAdmin}
     className="bg-red-600 text-white px-4 py-3 rounded-2xl font-bold shadow"
   >
+    
     Logout
   </button>
 </div>
